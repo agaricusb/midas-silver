@@ -24,7 +24,6 @@ import havocx42.ErrorHandler;
 import havocx42.PlayerFile;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Point;
@@ -38,7 +37,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -47,23 +45,16 @@ import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-import java.util.zip.InflaterInputStream;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -72,7 +63,6 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 
@@ -88,16 +78,16 @@ import region.RegionFile;
  * TODO: Clean up, isolate visualization from logic and data
  */
 public class IDChanger extends JFrame implements ActionListener {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4828256928267701067L;
 	private ArrayList<File> saveGames = new ArrayList<File>();
-	private ArrayList<String> idNames = new ArrayList<String>();
-	private static final int VERSION_GZIP = 1;
-	private static final int VERSION_DEFLATE = 2;
 	// Gui Elements
 	private JComboBox cb_selectSaveGame;
 	private JComboBox cb_selectSourceID;
 	private JComboBox cb_selectTargetID;
-
-	private JCheckBox c_backup;
 
 	DefaultListModel model = new DefaultListModel();
 	private JList li_ID;
@@ -141,7 +131,7 @@ public class IDChanger extends JFrame implements ActionListener {
 			File f = new File((new File(path)).getParent(), "IDNames.txt");
 			if (f.exists()) {
 				try {
-					idNames = readFile(f);
+					readFile(f);
 				} catch (IOException e) {
 					ErrorHandler.logError(e);
 				}
@@ -177,11 +167,6 @@ public class IDChanger extends JFrame implements ActionListener {
 		return pnl_start;
 	}
 
-	private JCheckBox createBackupCheckBox() {
-		c_backup = new JCheckBox("Make a backup", false);
-		return c_backup;
-	}
-
 	private JProgressBar createFileProgressBar() {
 		pb_file = new JProgressBar(0, 100);
 		pb_file.setValue(0);
@@ -196,49 +181,11 @@ public class IDChanger extends JFrame implements ActionListener {
 		return pb_chunk;
 	}
 
-	// new version changed From to Translations
-	private JPanel createChooseIDsPanel() {
-		JPanel pnl_chooseIDs = new JPanel();
-		pnl_chooseIDs.setBorder(BorderFactory.createTitledBorder("Change IDs"));
-		pnl_chooseIDs.setLayout(new BoxLayout(pnl_chooseIDs,
-				BoxLayout.PAGE_AXIS));
-		pnl_chooseIDs.add(new JLabel("Translations: "));
-		pnl_chooseIDs.add(initIDPane());
-		pnl_chooseIDs.add(initSourceIDPanel());
-		pnl_chooseIDs.add(new JLabel("To:"));
-		pnl_chooseIDs.add(createSelectTargetIDComboBox());
-
-		return pnl_chooseIDs;
-	}
-
-	private JPanel initSourceIDPanel() {
-		JPanel pnl_sourceID = new JPanel(new FlowLayout());
-		pnl_sourceID.add(createSelectSourceIDComboBox());
-		pnl_sourceID.add(createAddIDButton());
-		pnl_sourceID.add(createRemoveIDButton());
-		return pnl_sourceID;
-	}
-
 	private JButton createStartButton() {
 		JButton btn_start = new JButton("Start");
 		btn_start.addActionListener(this);
 		btn_start.setActionCommand("start");
 		return btn_start;
-	}
-
-	// new version updated buttons
-	private JButton createRemoveIDButton() {
-		JButton btn_removeID = new JButton("Remove Translation");
-		btn_removeID.addActionListener(this);
-		btn_removeID.setActionCommand("removeID");
-		return btn_removeID;
-	}
-
-	private JButton createAddIDButton() {
-		JButton btn_addID = new JButton("Add Translation");
-		btn_addID.addActionListener(this);
-		btn_addID.setActionCommand("addID");
-		return btn_addID;
 	}
 
 	// new version
@@ -251,61 +198,6 @@ public class IDChanger extends JFrame implements ActionListener {
 		pnl_openFiles.add(createOpenFileButton());
 
 		return pnl_openFiles;
-	}
-
-	// new version
-	private JButton createOpenPatchFileButton() {
-		JButton btn_openFile = new JButton("Load");
-		btn_openFile.addActionListener(this);
-		btn_openFile.setActionCommand("openPatch");
-		return btn_openFile;
-	}
-
-	private JScrollPane initIDPane() {
-		JScrollPane pn_ID = new JScrollPane(initIDTextArea());
-		pn_ID.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		return pn_ID;
-	}
-
-	private JList initIDTextArea() {
-		li_ID = new JList(model);
-		return li_ID;
-	}
-
-	private JComboBox createSelectSourceIDComboBox() {
-		if (idNames.size() > 0) {
-			cb_selectSourceID = new JComboBox(idNames.toArray());
-		} else {
-			cb_selectSourceID = new JComboBox();
-		}
-
-		CBRenderer renderer = new CBRenderer();
-		renderer.maxIndex = idNames.size() - 1;
-
-		cb_selectSourceID.setEditable(true);
-		cb_selectSourceID.setRenderer(renderer);
-
-		cb_selectSourceID.addActionListener(new NumberOnlyActionListener(
-				idNames, 0, 32000 - 1));
-		return cb_selectSourceID;
-	}
-
-	private JComboBox createSelectTargetIDComboBox() {
-		if (idNames.size() > 0) {
-			cb_selectTargetID = new JComboBox(idNames.toArray());
-		} else {
-			cb_selectTargetID = new JComboBox();
-		}
-
-		CBRenderer renderer = new CBRenderer();
-		renderer.maxIndex = idNames.size() - 1;
-
-		cb_selectTargetID.setEditable(true);
-		cb_selectTargetID.setRenderer(renderer);
-
-		cb_selectTargetID.addActionListener(new NumberOnlyActionListener(
-				idNames, 0, 32000 - 1));
-		return cb_selectTargetID;
 	}
 
 	private JComboBox createSelectSaveGameComboBox() {
@@ -707,9 +599,9 @@ public class IDChanger extends JFrame implements ActionListener {
 				 */
 
 				// change block ids
-				SwingWorker worker = new SwingWorker() {
+				SwingWorker<Void,Void> worker = new SwingWorker<Void, Void>() {
 					@Override
-					protected Object doInBackground() throws Exception {
+					protected Void doInBackground() throws Exception {
 						changeIDs(regionFiles, datFiles, translations);
 						return null;
 					}
@@ -719,26 +611,6 @@ public class IDChanger extends JFrame implements ActionListener {
 			} catch (IOException e1) {
 				ErrorHandler.logError(e1);
 			}
-		}
-	}
-
-	private void backUpSaveGame(File file) {
-		File regionDir = new File(file, "region");
-		if (!regionDir.exists()) {
-			return;
-		}
-		int num = 1;
-		File backUpDir = new File(file, "region_backup");
-		while (backUpDir.exists()) {
-			backUpDir = new File(file, "region_backup_" + num);
-			num++;
-		}
-		try {
-			FileTools.copyDirectory(regionDir, backUpDir);
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(this, "Could not create backup!",
-					"Error", JOptionPane.ERROR_MESSAGE);
-			ErrorHandler.logError(e);
 		}
 	}
 
@@ -995,6 +867,7 @@ public class IDChanger extends JFrame implements ActionListener {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 		}
+		@SuppressWarnings("unused")
 		IDChanger frame = new IDChanger("Tekkit 1.1.4 to 1.2 world converter");
 	}
 }
