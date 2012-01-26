@@ -21,8 +21,6 @@
 package pfaeff;
 
 import havocx42.ErrorHandler;
-import havocx42.PlayerFile;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -30,53 +28,37 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
-
 import nbt.Tag;
 import nbt.TagByteArray;
 import nbt.TagInputStream;
-import nbt.TagList;
 import nbt.TagOutputStream;
-import nbt.TagShort;
 import region.RegionFile;
 
-/*
- * TODO: Clean up, isolate visualization from logic and data
- */
+
 public class IDChanger extends JFrame implements ActionListener {
 
 	/**
@@ -86,11 +68,7 @@ public class IDChanger extends JFrame implements ActionListener {
 	private ArrayList<File> saveGames = new ArrayList<File>();
 	// Gui Elements
 	private JComboBox cb_selectSaveGame;
-	private JComboBox cb_selectSourceID;
-	private JComboBox cb_selectTargetID;
 
-	DefaultListModel model = new DefaultListModel();
-	private JList li_ID;
 
 	private JLabel lb_file;
 	private JLabel lb_chunk;
@@ -108,7 +86,6 @@ public class IDChanger extends JFrame implements ActionListener {
 
 		// Add GUI elements
 		getContentPane().add(createOpenFilesPanel(), BorderLayout.PAGE_START);
-		//getContentPane().add(createChooseIDsPanel(), BorderLayout.LINE_START);
 		getContentPane().add(createProgressPanel(), BorderLayout.LINE_START);
 		pack();
 
@@ -348,160 +325,6 @@ public class IDChanger extends JFrame implements ActionListener {
 			}
 		}
 
-		// new version open a patch file
-		if ("openPatch".equals(e.getActionCommand())) {
-			final JFileChooser fc = new JFileChooser();
-			String path;
-			try {
-				path = IDChanger.class.getProtectionDomain().getCodeSource()
-						.getLocation().toURI().getPath();
-				fc.setSelectedFile(new File((new File(path)).getParent(),
-						"Patch.txt"));
-			} catch (URISyntaxException e1) {
-				// TODO Auto-generated catch block
-				ErrorHandler.logError(e1);
-			}
-
-			int returnVal = fc.showOpenDialog(this);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				File f = fc.getSelectedFile();
-				if (f.exists()) {
-					try {
-						FileInputStream fstream = new FileInputStream(f);
-						DataInputStream in = new DataInputStream(fstream);
-						BufferedReader br = new BufferedReader(
-								new InputStreamReader(in));
-						String strLine;
-						while ((strLine = br.readLine()) != null) {
-							try {
-								if (strLine.contains(" -> ")) {
-									String currentsource = strLine.substring(0,
-											strLine.indexOf('-') - 1);
-									String currenttarget = strLine
-											.substring(strLine.indexOf('>') + 2);
-
-									boolean first;
-									boolean second;
-									if (currentsource.contains(" ")) {
-										first = Integer.valueOf((currentsource)
-												.substring(0, (currentsource)
-														.indexOf(' '))) != null;
-									} else {
-										first = Integer.valueOf(currentsource) != null;
-									}
-
-									if (currenttarget.contains(" ")) {
-										second = Integer
-												.valueOf((currenttarget)
-														.substring(
-																0,
-																(currenttarget)
-																		.indexOf(' '))) != null;
-									} else {
-										second = Integer.valueOf(currenttarget) != null;
-									}
-
-									if (first && second) {
-										int index = 0;
-										if (model.getSize() > 0) {
-											index = model.getSize();
-										}
-										model.add(index, strLine);
-									} else {
-										ErrorHandler
-												.logError("Patch contains an invalid line, no big deal: "
-														+ strLine);
-									}
-
-								} else {
-									ErrorHandler
-											.logError("Patch contains an invalid line, no big deal"
-													+ strLine);
-								}
-							} catch (NumberFormatException e2) {
-								// JOptionPane.showMessageDialog(this,
-								// "That's not how you format translations \""+strLine+System.getProperty("line.separator")+"example:"+System.getProperty("line.separator")+"1 stone -> 3 dirt",
-								// "Error", JOptionPane.ERROR_MESSAGE);
-								ErrorHandler
-										.logError("Patch contains an invalid line, no big deal"
-												+ strLine);
-								continue;
-							}
-
-						}
-						br.close();
-						in.close();
-						fstream.close();
-
-					} catch (Exception filewriting) {
-						ErrorHandler.logError(filewriting);
-					}
-				}
-
-			}
-		}
-
-		// Add ID
-		// new version adds user stupidity resistance II
-		if ("addID".equals(e.getActionCommand())) {
-			try {
-				String currentsource = (String) cb_selectSourceID
-						.getSelectedItem();
-				String currenttarget = (String) cb_selectTargetID
-						.getSelectedItem();
-
-				boolean first;
-				boolean second;
-				if (currentsource.contains(" ")) {
-					first = Integer.valueOf((currentsource).substring(0,
-							(currentsource).indexOf(' '))) != null;
-				} else {
-					first = Integer.valueOf(currentsource) != null;
-				}
-
-				if (currenttarget.contains(" ")) {
-					second = Integer.valueOf((currenttarget).substring(0,
-							(currenttarget).indexOf(' '))) != null;
-				} else {
-					second = Integer.valueOf(currenttarget) != null;
-				}
-				if (first && second) {
-					int index = 0;
-					if (model.getSize() > 0) {
-						index = model.getSize();
-					}
-					// new version uses adds -> targetid to string
-
-					model.add(
-							index,
-							(String) cb_selectSourceID.getSelectedItem()
-									+ " -> "
-									+ (String) cb_selectTargetID
-											.getSelectedItem());
-					// old version- didn't include target
-					// model.add(index,
-					// (String)cb_selectSourceID.getSelectedItem()+);
-				}
-			} catch (NumberFormatException badinput) {
-				JOptionPane.showMessageDialog(
-						this,
-						"That's not how you format translations"
-								+ System.getProperty("line.separator")
-								+ "example:"
-								+ System.getProperty("line.separator")
-								+ "1 stone -> 3 dirt", "Error",
-						JOptionPane.ERROR_MESSAGE);
-				// ErrorHandler.logError(badinput);
-			}
-		}
-
-		// Remove ID
-		if ("removeID".equals(e.getActionCommand())) {
-			for (int i = li_ID.getSelectedIndices().length - 1; i >= 0; i--) {
-				model.remove(li_ID.getSelectedIndices()[i]);
-			}
-			// model.remove(model.indexOf((String)li_ID.getSelectedValue()));
-		}
 		// Start
 		if ("start".equals(e.getActionCommand())) {
 			// Savegame
@@ -519,90 +342,24 @@ public class IDChanger extends JFrame implements ActionListener {
 
 				final ArrayList<RegionFile> regionFiles = NBTFileIO
 						.getRegionFiles(saveGames.get(saveIndex));
-				final ArrayList<PlayerFile> datFiles = NBTFileIO
-						.getDatFiles(saveGames.get(saveIndex));
 				// Backup savegame
 				// if (c_backup.isSelected()) {
 				// backUpSaveGame(saveGames.get(saveIndex));
 				// }
 
-				if (model.size() == 0) {
-					JOptionPane.showMessageDialog(this,
-							"No IDs have been chosen!", "Warning",
-							JOptionPane.WARNING_MESSAGE);
-					return;
-				}
-				// new version use a hashmap to record what blocks to transmute
-				// to what.
+
 				final HashMap<Integer, Integer> translations = new HashMap<Integer, Integer>();
-				// Create file
-				FileWriter fstream = new FileWriter("lasttranslation.txt");
-				BufferedWriter log = new BufferedWriter(fstream);
 
-				for (int i = 0; i < model.size(); i++) {
-					String current = (String) model.get(i);
-					String currentsource;
-					String currenttarget;
-
-					if (current == null) {
-						return;
-					}
-
-					if (current.contains("->")) {
-						currentsource = current.substring(0,
-								current.indexOf("-"));
-						currenttarget = current
-								.substring(current.indexOf(">") + 2);
-						if (currentsource.contains(" ")) {
-							currentsource = currentsource.substring(0,
-									currentsource.indexOf(" "));
-						}
-						if (currenttarget.contains(" ")) {
-							currenttarget = currenttarget.substring(0,
-									currenttarget.indexOf(" "));
-						}
-					} else {
-						return;
-					}
-					log.write(current);
-					log.newLine();
-					Integer sid = Integer.valueOf(currentsource);
-					Integer tid = Integer.valueOf(currenttarget);
-					if (sid != null && tid != null) {
-						translations.put(sid, tid);
-					}
-
-				}
-				log.close();
-
-				// old version- reading from the target dropdown, now reads
-				// individual translations from string.
-				/*
-				 * // Source IDs final Set<Integer> sourceIDs = new
-				 * HashSet<Integer>(); for (int i = 0; i < model.size(); i++) {
-				 * String current = (String) model.get(i);
-				 * 
-				 * if (current == null) { return; }
-				 * 
-				 * if (current.contains(" ")) { current = current.substring(0,
-				 * current.indexOf(" ")); }
-				 * sourceIDs.add(Integer.parseInt(current)); }
-				 * 
-				 * // Target ID String current = (String)
-				 * cb_selectTargetID.getSelectedItem();
-				 * 
-				 * if (current == null) { return; }
-				 * 
-				 * if (current.contains(" ")) { current = current.substring(0,
-				 * current.indexOf(" ")); } final short targetID =
-				 * (short)Integer.parseInt(current);
-				 */
+				translations.put(new Integer(206),new Integer(211));
+				translations.put(new Integer(207),new Integer(212));
+				translations.put(new Integer(208),new Integer(213));
+				
 
 				// change block ids
 				SwingWorker<Void,Void> worker = new SwingWorker<Void, Void>() {
 					@Override
 					protected Void doInBackground() throws Exception {
-						changeIDs(regionFiles, datFiles, translations);
+						changeIDs(regionFiles, translations);
 						return null;
 					}
 				};
@@ -624,16 +381,10 @@ public class IDChanger extends JFrame implements ActionListener {
 	 * @throws IOException
 	 */
 	public void changeIDs(ArrayList<RegionFile> regionFiles,
-			ArrayList<PlayerFile> datFiles,
 			HashMap<Integer, Integer> translations) throws IOException {
 		try {
 
-
 			long beginTime = System.currentTimeMillis();
-
-
-			// player inventories
-			convertPlayerInventories(datFiles, translations);
 			// PROGESSBAR FILE
 			int count_file = 0;
 			if (regionFiles == null) {
@@ -678,8 +429,6 @@ public class IDChanger extends JFrame implements ActionListener {
 					TIS.close();
 					// Find blocks
 					convertRegion(root, translations);
-					// find blocks and items in chest etc. inventory
-					convertItems(root, translations);
 					
 					// Write chunks
 					DataOutputStream output = rf.getChunkDataOutputStream(p.x,
@@ -707,73 +456,6 @@ public class IDChanger extends JFrame implements ActionListener {
 		}
 	}
 
-	public void convertPlayerInventories(ArrayList<PlayerFile> datFiles,
-			HashMap<Integer, Integer> translations) {
-		try {
-			
-			pb_file.setMaximum(datFiles.size() - 1);
-			int count_file = 0;
-
-			
-			for (PlayerFile df : datFiles) {
-				
-				pb_file.setValue(count_file++);
-				lb_file.setText("Current File: " + df.getName());
-				DataInputStream dfinput = getLevelDataInputStream(df);
-				TagInputStream tis = new TagInputStream(dfinput);
-				Tag dfroot;
-
-				dfroot = tis.readTag(true);
-
-				ArrayList<Tag> items = new ArrayList<Tag>();
-				dfroot.findAllChildrenByName(items, "Inventory", true);
-				HashMap<Integer, Integer> indexToBlockIDs;
-				for (Tag t2 : items) {
-					indexToBlockIDs = new HashMap<Integer, Integer>();
-					if (t2 instanceof TagList) {
-						ArrayList<Tag> ids = new ArrayList<Tag>();
-						t2.findAllChildrenByName(ids, "id", true);
-						for (int i = 0; i < ids.size(); i++) {
-							Tag id = ids.get(i);
-							if (id instanceof TagShort) {
-								TagShort idShort = (TagShort) id;
-								if (translations.containsKey(Integer.valueOf(
-										idShort.payload))) {
-									Integer toval = translations.get(Integer
-											.valueOf(idShort.payload));
-									if (toval != null) {
-										indexToBlockIDs.put(Integer.valueOf(i),
-												toval);
-									} else {
-										ErrorHandler.logError("null target for"+idShort.payload);
-									}
-								}
-							}
-						}
-						// update nbt tree
-						Set<Integer> set = indexToBlockIDs.keySet();
-						for (Integer i : set) {
-							((TagShort) ids.get(i)).payload = indexToBlockIDs
-									.get(i).shortValue();
-						}
-					}
-				}
-				ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				DataOutputStream dfoutput = new DataOutputStream(
-						new GZIPOutputStream(bos));
-				(new TagOutputStream(dfoutput)).writeTag(dfroot, true);
-				dfoutput.close();
-				df.seek(0);
-				df.write(bos.toByteArray());
-				df.close();
-				dfinput.close();
-				tis.close();
-			}
-		} catch (IOException e) {
-			ErrorHandler.logError(e);
-		}
-
-	}
 
 	public void convertRegion(Tag root,final HashMap<Integer, Integer> translations) {
 		Tag t = root.findChildByName("Blocks", true);
@@ -804,60 +486,6 @@ public class IDChanger extends JFrame implements ActionListener {
 					ErrorHandler.logError(entry.getKey()+" not converted to "+entry.getValue());
 				}
 			}
-//			System.out.print("test");
-		}
-	}
-
-	public void convertItems(Tag root, HashMap<Integer, Integer> translations) {
-		HashMap<Integer, Integer> indexToBlockIDs;
-		ArrayList<Tag> items = new ArrayList<Tag>();
-		root.findAllChildrenByName(items, "Items", true);
-		for (Tag t2 : items) {
-			if (t2 instanceof TagList) {
-				ArrayList<Tag> ids = new ArrayList<Tag>();
-				t2.findAllChildrenByName(ids, "id", true);
-				indexToBlockIDs = new HashMap<Integer, Integer>();
-				for (int i = 0; i < ids.size(); i++) {
-					Tag id = ids.get(i);
-					if (id instanceof TagShort) {
-						TagShort idShort = (TagShort) id;
-						if (translations.containsKey(Integer.valueOf(
-								idShort.payload))) {
-							Integer toval = translations.get(Integer
-									.valueOf(idShort.payload));
-							if (toval != null) {
-								indexToBlockIDs.put(Integer.valueOf(i), toval);
-							} else {
-								System.err.println("null target");
-								ErrorHandler.logError("null Target while converting items");
-							}
-						}
-					}
-				}
-				// update nbt tree
-				Set<Integer> set = indexToBlockIDs.keySet();
-				for (Integer i : set) {
-					((TagShort) ids.get(i)).payload = indexToBlockIDs.get(i)
-							.shortValue();
-				}
-			}
-		}
-	}
-
-	public DataInputStream getLevelDataInputStream(RandomAccessFile f) {
-		try {
-			// might crash if file is HUGE
-			byte[] data = new byte[(int) (f.length() - 1)];
-			f.read(data);
-			DataInputStream ret = new DataInputStream(new GZIPInputStream(
-					new ByteArrayInputStream(data)));
-			// debug("READ", x, z, " = found");
-			return ret;
-
-		} catch (IOException e) {
-			// debugln("READ", x, z, "exception");
-			ErrorHandler.logError(e);
-			return null;
 		}
 	}
 
