@@ -132,7 +132,7 @@ public class IDChanger extends JFrame implements ActionListener {
 		pnl_progress.add(lb_chunk);
 		pnl_progress.add(createChunkProgressBar());
 
-		pnl_progress.setPreferredSize(new Dimension(400, 100));
+		pnl_progress.setPreferredSize(new Dimension(400, 150));
 
 		return pnl_progress;
 	}
@@ -496,6 +496,6 @@ public class IDChanger extends JFrame implements ActionListener {
 		} catch (Exception e) {
 		}
 		@SuppressWarnings("unused")
-		IDChanger frame = new IDChanger("Tekkit 1.1.4 to 1.2 world converter");
+		IDChanger frame = new IDChanger("Tekkit 1.1.4 to 1.2 world converter - by havocx42");
 	}
 }
