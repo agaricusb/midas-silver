@@ -99,7 +99,7 @@ public class IDChanger extends JFrame implements ActionListener {
 
 	private JCheckBox c_backup;
 
-	DefaultListModel<String> model = new DefaultListModel<String>();
+	DefaultListModel model = new DefaultListModel();
 	private JList li_ID;
 
 	private JLabel lb_file;
@@ -118,8 +118,8 @@ public class IDChanger extends JFrame implements ActionListener {
 
 		// Add GUI elements
 		getContentPane().add(createOpenFilesPanel(), BorderLayout.PAGE_START);
-		getContentPane().add(createChooseIDsPanel(), BorderLayout.LINE_START);
-		getContentPane().add(createProgressPanel(), BorderLayout.LINE_END);
+		//getContentPane().add(createChooseIDsPanel(), BorderLayout.LINE_START);
+		getContentPane().add(createProgressPanel(), BorderLayout.LINE_START);
 		pack();
 
 		setLocationRelativeTo(null);
@@ -165,8 +165,7 @@ public class IDChanger extends JFrame implements ActionListener {
 		pnl_progress.add(lb_chunk);
 		pnl_progress.add(createChunkProgressBar());
 
-		pnl_progress.setPreferredSize(new Dimension(400, pnl_progress
-				.getHeight()));
+		pnl_progress.setPreferredSize(new Dimension(400, 100));
 
 		return pnl_progress;
 	}
@@ -246,9 +245,7 @@ public class IDChanger extends JFrame implements ActionListener {
 	private JPanel createOpenFilesPanel() {
 		JPanel pnl_openFiles = new JPanel(new FlowLayout());
 		pnl_openFiles.setBorder(BorderFactory
-				.createTitledBorder("Select files"));
-		pnl_openFiles.add(new JLabel("Load patch file:"));
-		pnl_openFiles.add(createOpenPatchFileButton());
+				.createTitledBorder("Select Savegame"));
 		pnl_openFiles.add(new JLabel("Available savegames:"));
 		pnl_openFiles.add(createSelectSaveGameComboBox());
 		pnl_openFiles.add(createOpenFileButton());
@@ -998,6 +995,6 @@ public class IDChanger extends JFrame implements ActionListener {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 		}
-		IDChanger frame = new IDChanger("mIDas *GOLD* V0.1.7 ");
+		IDChanger frame = new IDChanger("Tekkit 1.1.4 to 1.2 world converter");
 	}
 }
