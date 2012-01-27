@@ -92,6 +92,10 @@ public class IDChanger extends JFrame implements ActionListener {
 	private ArrayList<String> idNames = new ArrayList<String>();
 	private static final int VERSION_GZIP = 1;
 	private static final int VERSION_DEFLATE = 2;
+	public int changedPlaced = 0;
+	public int changedChest = 0;
+	public int changedPlayer = 0;
+
 	// Gui Elements
 	private JComboBox cb_selectSaveGame;
 	private JComboBox cb_selectSourceID;
@@ -759,9 +763,7 @@ public class IDChanger extends JFrame implements ActionListener {
 			HashMap<Integer, Integer> translations) throws IOException {
 		try {
 
-
 			long beginTime = System.currentTimeMillis();
-
 
 			// player inventories
 			convertPlayerInventories(datFiles, translations);
@@ -811,7 +813,7 @@ public class IDChanger extends JFrame implements ActionListener {
 					convertRegion(root, translations);
 					// find blocks and items in chest etc. inventory
 					convertItems(root, translations);
-					
+
 					// Write chunks
 					DataOutputStream output = rf.getChunkDataOutputStream(p.x,
 							p.y);
@@ -825,29 +827,37 @@ public class IDChanger extends JFrame implements ActionListener {
 			}
 
 			long duration = System.currentTimeMillis() - beginTime;
-			JOptionPane.showMessageDialog(this, "Done in " + duration + "ms",
+			JOptionPane.showMessageDialog(
+					this,
+					"Done in " + duration + "ms"
+							+ System.getProperty("line.separator")
+							+ changedPlaced + " placed blocks changed."
+							+ System.getProperty("line.separator")
+							+ changedPlayer
+							+ " blocks in player inventories changed."
+							+ System.getProperty("line.separator")
+							+ changedChest
+							+ " blocks in entity inventories changed.",
 					"Information", JOptionPane.INFORMATION_MESSAGE);
 		} catch (NullPointerException npe) {
 			ErrorHandler.logError(npe);
 			JOptionPane
-			.showMessageDialog(
-					this,
-					"A serious error has occured, an errorlog should have been created. Please report this on the MC forum thread.",
-					"Information",
-					JOptionPane.INFORMATION_MESSAGE);
+					.showMessageDialog(
+							this,
+							"A serious error has occured, an errorlog should have been created. Please report this on the MC forum thread.",
+							"Information", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 
 	public void convertPlayerInventories(ArrayList<PlayerFile> datFiles,
 			HashMap<Integer, Integer> translations) {
 		try {
-			
+
 			pb_file.setMaximum(datFiles.size() - 1);
 			int count_file = 0;
 
-			
 			for (PlayerFile df : datFiles) {
-				
+
 				pb_file.setValue(count_file++);
 				lb_file.setText("Current File: " + df.getName());
 				DataInputStream dfinput = getLevelDataInputStream(df);
@@ -868,15 +878,17 @@ public class IDChanger extends JFrame implements ActionListener {
 							Tag id = ids.get(i);
 							if (id instanceof TagShort) {
 								TagShort idShort = (TagShort) id;
-								if (translations.containsKey(Integer.valueOf(
-										idShort.payload))) {
+								if (translations.containsKey(Integer
+										.valueOf(idShort.payload))) {
 									Integer toval = translations.get(Integer
 											.valueOf(idShort.payload));
 									if (toval != null) {
+										changedPlayer++;
 										indexToBlockIDs.put(Integer.valueOf(i),
 												toval);
 									} else {
-										ErrorHandler.logError("null target for"+idShort.payload);
+										ErrorHandler.logError("null target for"
+												+ idShort.payload);
 									}
 								}
 							}
@@ -906,36 +918,40 @@ public class IDChanger extends JFrame implements ActionListener {
 
 	}
 
-	public void convertRegion(Tag root,final HashMap<Integer, Integer> translations) {
+	public void convertRegion(Tag root,
+			final HashMap<Integer, Integer> translations) {
 		Tag t = root.findChildByName("Blocks", true);
 		if (t instanceof TagByteArray) {
 			TagByteArray blocks = (TagByteArray) t;
 			HashMap<Integer, Integer> indexToBlockIDs;
 			indexToBlockIDs = new HashMap<Integer, Integer>();
-			for (int i = 0; i < blocks.payload.length; i++) {	
-				Integer bID = Integer.valueOf(
-						0x000000FF & (int) (blocks.payload[i]));
+			for (int i = 0; i < blocks.payload.length; i++) {
+				Integer bID = Integer
+						.valueOf(0x000000FF & (int) (blocks.payload[i]));
 				if (translations.containsKey(bID)) {
 					// Only allow blocks to be replaced with
 					// blocks
 					if (translations.get(bID) <= 255) {
+						changedPlaced++;
 						indexToBlockIDs.put(Integer.valueOf(i),
 								translations.get(bID));
 					}
 				}
 			}
-			
+
 			// write changes to nbt tree
-			Set<Map.Entry<Integer,Integer>> set = indexToBlockIDs.entrySet();
-			for (Entry<Integer,Integer> entry : set) {
+			Set<Map.Entry<Integer, Integer>> set = indexToBlockIDs.entrySet();
+			for (Entry<Integer, Integer> entry : set) {
 				blocks.payload[entry.getKey()] = entry.getValue().byteValue();
 			}
-			for (Entry<Integer,Integer> entry : set) {
-				if((byte)blocks.payload[entry.getKey()] != (byte)entry.getValue().byteValue()){
-					ErrorHandler.logError(entry.getKey()+" not converted to "+entry.getValue());
+			for (Entry<Integer, Integer> entry : set) {
+				if ((byte) blocks.payload[entry.getKey()] != (byte) entry
+						.getValue().byteValue()) {
+					ErrorHandler.logError(entry.getKey() + " not converted to "
+							+ entry.getValue());
 				}
 			}
-//			System.out.print("test");
+			// System.out.print("test");
 		}
 	}
 
@@ -952,15 +968,17 @@ public class IDChanger extends JFrame implements ActionListener {
 					Tag id = ids.get(i);
 					if (id instanceof TagShort) {
 						TagShort idShort = (TagShort) id;
-						if (translations.containsKey(Integer.valueOf(
-								idShort.payload))) {
+						if (translations.containsKey(Integer
+								.valueOf(idShort.payload))) {
 							Integer toval = translations.get(Integer
 									.valueOf(idShort.payload));
 							if (toval != null) {
+								changedChest++;
 								indexToBlockIDs.put(Integer.valueOf(i), toval);
 							} else {
 								System.err.println("null target");
-								ErrorHandler.logError("null Target while converting items");
+								ErrorHandler
+										.logError("null Target while converting items");
 							}
 						}
 					}
