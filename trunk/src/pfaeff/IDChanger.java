@@ -75,6 +75,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
+import javax.swing.text.ChangedCharSetException;
 
 import nbt.Tag;
 import nbt.TagByteArray;
@@ -103,7 +104,7 @@ public class IDChanger extends JFrame implements ActionListener {
 
 	private JCheckBox c_backup;
 
-	DefaultListModel<String> model = new DefaultListModel<String>();
+	DefaultListModel model = new DefaultListModel();
 	private JList li_ID;
 
 	private JLabel lb_file;
@@ -761,6 +762,9 @@ public class IDChanger extends JFrame implements ActionListener {
 	public void changeIDs(ArrayList<RegionFile> regionFiles,
 			ArrayList<PlayerFile> datFiles,
 			HashMap<Integer, Integer> translations) throws IOException {
+			changedChest=0;
+			changedPlaced=0;
+			changedPlayer=0;
 		try {
 
 			long beginTime = System.currentTimeMillis();
