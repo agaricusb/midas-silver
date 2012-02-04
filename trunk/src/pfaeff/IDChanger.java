@@ -624,6 +624,8 @@ public class IDChanger extends JFrame implements ActionListener {
 			int saveIndex = cb_selectSaveGame.getSelectedIndex();
 			// System.out.println("Selected Savegame " +
 			// saveGames.get(saveIndex));
+			BufferedWriter log=null;
+			FileWriter fstream =null;
 			try {
 				if ((saveGames == null) || (saveGames.size() == 0)) {
 					return;
@@ -652,8 +654,8 @@ public class IDChanger extends JFrame implements ActionListener {
 				// to what.
 				final HashMap<Integer, Integer> translations = new HashMap<Integer, Integer>();
 				// Create file
-				FileWriter fstream = new FileWriter("lasttranslation.txt");
-				BufferedWriter log = new BufferedWriter(fstream);
+				fstream = new FileWriter("lasttranslation.txt");
+				log = new BufferedWriter(fstream);
 
 				for (int i = 0; i < model.size(); i++) {
 					String current = (String) model.get(i);
@@ -689,7 +691,7 @@ public class IDChanger extends JFrame implements ActionListener {
 					}
 
 				}
-				log.close();
+				
 
 				// old version- reading from the target dropdown, now reads
 				// individual translations from string.
@@ -726,6 +728,23 @@ public class IDChanger extends JFrame implements ActionListener {
 				worker.execute();
 			} catch (IOException e1) {
 				ErrorHandler.logError(e1);
+			}finally{
+				if (log!=null){
+					try {
+						log.close();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+				if (fstream!=null){
+					try {
+						fstream.close();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
 			}
 		}
 	}
