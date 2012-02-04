@@ -22,6 +22,7 @@ package pfaeff;
 
 import havocx42.ErrorHandler;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Point;
@@ -167,12 +168,19 @@ public class IDChanger extends JFrame implements ActionListener {
 
 	// new version
 	private JPanel createOpenFilesPanel() {
-		JPanel pnl_openFiles = new JPanel(new FlowLayout());
+		JPanel pnl_openFiles = new JPanel();
+		Box b= new Box(BoxLayout.LINE_AXIS);
+		pnl_openFiles.setLayout(new BoxLayout(pnl_openFiles,BoxLayout.PAGE_AXIS));
+		JLabel l = new JLabel("Only Select a Tekkit 1.1.4 World!!!");
+		l.setAlignmentX(Component.CENTER_ALIGNMENT);
+		pnl_openFiles.add(l);
 		pnl_openFiles.setBorder(BorderFactory
 				.createTitledBorder("Select Savegame"));
-		pnl_openFiles.add(new JLabel("Available savegames:"));
-		pnl_openFiles.add(createSelectSaveGameComboBox());
-		pnl_openFiles.add(createOpenFileButton());
+		b.add(new JLabel("Available savegames:"));
+		b.add(createSelectSaveGameComboBox());
+		b.add(createOpenFileButton());
+		pnl_openFiles.add(b);
+		
 
 		return pnl_openFiles;
 	}
@@ -340,6 +348,14 @@ public class IDChanger extends JFrame implements ActionListener {
 					return;
 				}
 
+				File f;
+				f=new File(saveGames.get(saveIndex),"convertedto1_2");
+				if(f.exists()){
+					JOptionPane.showMessageDialog(this, "World already converted. To force another conversion delete convertedto1_2 file in save directory",
+							"Information", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				
 				final ArrayList<RegionFile> regionFiles = NBTFileIO
 						.getRegionFiles(saveGames.get(saveIndex));
 				// Backup savegame
@@ -365,6 +381,10 @@ public class IDChanger extends JFrame implements ActionListener {
 				};
 				// worker.addPropertyChangeListener(this);
 				worker.execute();
+				f=new File(saveGames.get(saveIndex),"convertedto1_2");
+				if(!f.exists()){
+					f.createNewFile();
+				}
 			} catch (IOException e1) {
 				ErrorHandler.logError(e1);
 			}
