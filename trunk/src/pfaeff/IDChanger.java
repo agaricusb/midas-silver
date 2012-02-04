@@ -22,6 +22,7 @@ package pfaeff;
 
 import havocx42.ErrorHandler;
 import havocx42.PlayerFile;
+import havocx42.TranslationRecord;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -400,7 +401,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				JOptionPane
 						.showMessageDialog(
 								this,
-								"Thats not how you format IDNames \"" + line
+								"That's not how you format IDNames \"" + line
 										+ System.getProperty("line.separator")
 										+ "example:"
 										+ System.getProperty("line.separator")
@@ -488,52 +489,18 @@ public class IDChanger extends JFrame implements ActionListener {
 						BufferedReader br = new BufferedReader(
 								new InputStreamReader(in));
 						String strLine;
+						TranslationRecord tr;
 						while ((strLine = br.readLine()) != null) {
 							try {
-								if (strLine.contains(" -> ")) {
-									String currentsource = strLine.substring(0,
-											strLine.indexOf('-') - 1);
-									String currenttarget = strLine
-											.substring(strLine.indexOf('>') + 2);
-
-									boolean first;
-									boolean second;
-									if (currentsource.contains(" ")) {
-										first = Integer.valueOf((currentsource)
-												.substring(0, (currentsource)
-														.indexOf(' '))) != null;
-									} else {
-										first = Integer.valueOf(currentsource) != null;
-									}
-
-									if (currenttarget.contains(" ")) {
-										second = Integer
-												.valueOf((currenttarget)
-														.substring(
-																0,
-																(currenttarget)
-																		.indexOf(' '))) != null;
-									} else {
-										second = Integer.valueOf(currenttarget) != null;
-									}
-
-									if (first && second) {
-										int index = 0;
-										if (model.getSize() > 0) {
-											index = model.getSize();
-										}
-										model.add(index, strLine);
-									} else {
-										ErrorHandler
-												.logError("Patch contains an invalid line, no big deal: "
-														+ strLine);
-									}
-
+								tr = createTranslationRecord(strLine);
+								if (tr != null) {
+									addTranslation(tr);
 								} else {
 									ErrorHandler
-											.logError("Patch contains an invalid line, no big deal"
+											.logError("Patch contains an invalid line, no big deal: "
 													+ strLine);
 								}
+
 							} catch (NumberFormatException e2) {
 								// JOptionPane.showMessageDialog(this,
 								// "That's not how you format translations \""+strLine+System.getProperty("line.separator")+"example:"+System.getProperty("line.separator")+"1 stone -> 3 dirt",
@@ -561,43 +528,32 @@ public class IDChanger extends JFrame implements ActionListener {
 		// new version adds user stupidity resistance II
 		if ("addID".equals(e.getActionCommand())) {
 			try {
-				String currentsource = (String) cb_selectSourceID
+				String currentSource = (String) cb_selectSourceID
 						.getSelectedItem();
-				String currenttarget = (String) cb_selectTargetID
+				String currentTarget = (String) cb_selectTargetID
 						.getSelectedItem();
 
-				boolean first;
-				boolean second;
-				if (currentsource.contains(" ")) {
-					first = Integer.valueOf((currentsource).substring(0,
-							(currentsource).indexOf(' '))) != null;
+				TranslationRecord tr = createTranslationRecord(currentSource,
+						currentTarget);
+				if (tr != null) {
+					addTranslation(tr);
 				} else {
-					first = Integer.valueOf(currentsource) != null;
+					JOptionPane.showMessageDialog(
+							this,
+							"That's not how you format translations"
+									+ System.getProperty("line.separator")
+									+ "example:"
+									+ System.getProperty("line.separator")
+									+ "1 stone"
+									+ System.getProperty("line.separator")+
+									"3 dirt", "Error",
+							JOptionPane.ERROR_MESSAGE);
 				}
+				// new version uses adds -> targetid to string
 
-				if (currenttarget.contains(" ")) {
-					second = Integer.valueOf((currenttarget).substring(0,
-							(currenttarget).indexOf(' '))) != null;
-				} else {
-					second = Integer.valueOf(currenttarget) != null;
-				}
-				if (first && second) {
-					int index = 0;
-					if (model.getSize() > 0) {
-						index = model.getSize();
-					}
-					// new version uses adds -> targetid to string
-
-					model.add(
-							index,
-							(String) cb_selectSourceID.getSelectedItem()
-									+ " -> "
-									+ (String) cb_selectTargetID
-											.getSelectedItem());
-					// old version- didn't include target
-					// model.add(index,
-					// (String)cb_selectSourceID.getSelectedItem()+);
-				}
+				// old version- didn't include target
+				// model.add(index,
+				// (String)cb_selectSourceID.getSelectedItem()+);
 			} catch (NumberFormatException badinput) {
 				JOptionPane.showMessageDialog(
 						this,
@@ -624,8 +580,8 @@ public class IDChanger extends JFrame implements ActionListener {
 			int saveIndex = cb_selectSaveGame.getSelectedIndex();
 			// System.out.println("Selected Savegame " +
 			// saveGames.get(saveIndex));
-			BufferedWriter log=null;
-			FileWriter fstream =null;
+			BufferedWriter log = null;
+			FileWriter fstream = null;
 			try {
 				if ((saveGames == null) || (saveGames.size() == 0)) {
 					return;
@@ -658,40 +614,14 @@ public class IDChanger extends JFrame implements ActionListener {
 				log = new BufferedWriter(fstream);
 
 				for (int i = 0; i < model.size(); i++) {
-					String current = (String) model.get(i);
-					String currentsource;
-					String currenttarget;
-
-					if (current == null) {
-						return;
-					}
-
-					if (current.contains("->")) {
-						currentsource = current.substring(0,
-								current.indexOf("-"));
-						currenttarget = current
-								.substring(current.indexOf(">") + 2);
-						if (currentsource.contains(" ")) {
-							currentsource = currentsource.substring(0,
-									currentsource.indexOf(" "));
-						}
-						if (currenttarget.contains(" ")) {
-							currenttarget = currenttarget.substring(0,
-									currenttarget.indexOf(" "));
-						}
-					} else {
-						return;
-					}
-					log.write(current);
+					TranslationRecord tr=(TranslationRecord)model.get(i);
+					log.write(tr.toString());
 					log.newLine();
-					Integer sid = Integer.valueOf(currentsource);
-					Integer tid = Integer.valueOf(currenttarget);
-					if (sid != null && tid != null) {
-						translations.put(sid, tid);
+					if (tr.source != null && tr.target != null) {
+						translations.put(tr.source, tr.target);
 					}
 
 				}
-				
 
 				// old version- reading from the target dropdown, now reads
 				// individual translations from string.
@@ -728,8 +658,8 @@ public class IDChanger extends JFrame implements ActionListener {
 				worker.execute();
 			} catch (IOException e1) {
 				ErrorHandler.logError(e1);
-			}finally{
-				if (log!=null){
+			} finally {
+				if (log != null) {
 					try {
 						log.close();
 					} catch (IOException e1) {
@@ -737,7 +667,7 @@ public class IDChanger extends JFrame implements ActionListener {
 						e1.printStackTrace();
 					}
 				}
-				if (fstream!=null){
+				if (fstream != null) {
 					try {
 						fstream.close();
 					} catch (IOException e1) {
@@ -747,6 +677,74 @@ public class IDChanger extends JFrame implements ActionListener {
 				}
 			}
 		}
+	}
+
+	private TranslationRecord createTranslationRecord(String current) {
+		if (current.contains("->")) {
+			int index = current.indexOf("->");
+			String currentSource = current.substring(0, index );
+			String currentTarget = current.substring(index + 3);
+			return createTranslationRecord(currentSource, currentTarget);
+		} else {
+			return null;
+		}
+
+	}
+
+	private TranslationRecord createTranslationRecord(String sourceString,
+			String targetString) {
+		if(sourceString.contains("->")||targetString.contains("->"))return null;
+		int sourceSpaceIndex;
+		Integer source;
+		String sourceName;
+		if (sourceString.contains(" ")) {
+			sourceSpaceIndex = sourceString.indexOf(' ');
+			source = Integer.valueOf(sourceString
+					.substring(0, sourceSpaceIndex));
+			sourceName = sourceString.substring(sourceSpaceIndex);
+		} else {
+			source = Integer.valueOf(sourceString);
+			sourceName = "";
+		}
+
+		int targetSpaceIndex;
+		Integer target;
+		String targetName;
+		if (targetString.contains(" ")) {
+			targetSpaceIndex = targetString.indexOf(' ');
+			target = Integer.valueOf(targetString
+					.substring(0, targetSpaceIndex));
+			targetName = targetString.substring(targetSpaceIndex);
+		} else {
+			target = Integer.valueOf(targetString);
+			targetName = "";
+		}
+
+		if (target != null && source != null) {
+			return new TranslationRecord(source, target, sourceName, targetName);
+		} else {
+			return null;
+		}
+	}
+
+	private void addTranslation(TranslationRecord tr) {
+		for(int i =0;i<model.size();i++){
+			if (((TranslationRecord)model.get(i)).source ==tr.source){
+				JOptionPane
+				.showMessageDialog(
+						this,
+						"That Source ID is already being translated!",
+						"Information",
+						JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
+		}
+		int index = 0;
+		if (model.getSize() > 0) {
+			index = model.getSize();
+		}
+		model.add(index, tr);
+		return;
 	}
 
 	private void backUpSaveGame(File file) {
@@ -781,9 +779,9 @@ public class IDChanger extends JFrame implements ActionListener {
 	public void changeIDs(ArrayList<RegionFile> regionFiles,
 			ArrayList<PlayerFile> datFiles,
 			HashMap<Integer, Integer> translations) throws IOException {
-			changedChest=0;
-			changedPlaced=0;
-			changedPlayer=0;
+		changedChest = 0;
+		changedPlaced = 0;
+		changedPlayer = 0;
 		try {
 
 			long beginTime = System.currentTimeMillis();
@@ -1039,6 +1037,6 @@ public class IDChanger extends JFrame implements ActionListener {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 		}
-		IDChanger frame = new IDChanger("mIDas *GOLD* V0.1.7 ");
+		IDChanger frame = new IDChanger("mIDas *GOLD* V0.1.8 ");
 	}
 }
