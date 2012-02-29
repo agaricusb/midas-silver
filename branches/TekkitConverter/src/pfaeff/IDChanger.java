@@ -21,6 +21,9 @@
 package pfaeff;
 
 import havocx42.ErrorHandler;
+import havocx42.PlayerFile;
+import havocx42.TranslationRecord;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -29,47 +32,81 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.InflaterInputStream;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
+import javax.swing.text.ChangedCharSetException;
+
 import nbt.Tag;
 import nbt.TagByteArray;
 import nbt.TagInputStream;
+import nbt.TagList;
 import nbt.TagOutputStream;
+import nbt.TagShort;
 import region.RegionFile;
 
-
+/*
+ * TODO: Clean up, isolate visualization from logic and data
+ */
 public class IDChanger extends JFrame implements ActionListener {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4828256928267701067L;
 	private ArrayList<File> saveGames = new ArrayList<File>();
+	private ArrayList<String> idNames = new ArrayList<String>();
+	private static final int VERSION_GZIP = 1;
+	private static final int VERSION_DEFLATE = 2;
+	public int changedPlaced = 0;
+	public int changedChest = 0;
+	public int changedPlayer = 0;
+
 	// Gui Elements
 	private JComboBox cb_selectSaveGame;
+	private JComboBox cb_selectSourceID;
+	private JComboBox cb_selectTargetID;
 
+	private JCheckBox c_backup;
+
+	DefaultListModel model = new DefaultListModel();
+	private JList li_ID;
 
 	private JLabel lb_file;
 	private JLabel lb_chunk;
@@ -269,7 +306,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				JOptionPane
 						.showMessageDialog(
 								this,
-								"Thats not how you format IDNames \"" + line
+								"That's not how you format IDNames \"" + line
 										+ System.getProperty("line.separator")
 										+ "example:"
 										+ System.getProperty("line.separator")
@@ -332,13 +369,14 @@ public class IDChanger extends JFrame implements ActionListener {
 				}
 			}
 		}
-
 		// Start
 		if ("start".equals(e.getActionCommand())) {
 			// Savegame
 			int saveIndex = cb_selectSaveGame.getSelectedIndex();
 			// System.out.println("Selected Savegame " +
 			// saveGames.get(saveIndex));
+			BufferedWriter log = null;
+			FileWriter fstream = null;
 			try {
 				if ((saveGames == null) || (saveGames.size() == 0)) {
 					return;
@@ -358,38 +396,120 @@ public class IDChanger extends JFrame implements ActionListener {
 				
 				final ArrayList<RegionFile> regionFiles = NBTFileIO
 						.getRegionFiles(saveGames.get(saveIndex));
+				final ArrayList<PlayerFile> datFiles = NBTFileIO
+						.getDatFiles(saveGames.get(saveIndex));
 				// Backup savegame
 				// if (c_backup.isSelected()) {
 				// backUpSaveGame(saveGames.get(saveIndex));
 				// }
 
-
+				// new version use a hashmap to record what blocks to transmute
+				// to what.
 				final HashMap<Integer, Integer> translations = new HashMap<Integer, Integer>();
-
+				// Create file
+				
+				translations.put(new Integer(177),new Integer(135));
+				translations.put(new Integer(188),new Integer(124));
+				translations.put(new Integer(189),new Integer(125));
+				translations.put(new Integer(190),new Integer(123));
 				translations.put(new Integer(206),new Integer(211));
 				translations.put(new Integer(207),new Integer(212));
 				translations.put(new Integer(208),new Integer(213));
+				translations.put(new Integer(208),new Integer(213));
+				translations.put(new Integer(196),new Integer(255));
 				
+				
+				/*translations.put(new Integer(7048),new Integer(7055));
+				translations.put(new Integer(7049),new Integer(7047));
+				translations.put(new Integer(7047),new Integer(7051));
+				translations.put(new Integer(7046),new Integer(7052));
+				translations.put(new Integer(7045),new Integer(7009));
+				translations.put(new Integer(7005),new Integer(7006));
+				translations.put(new Integer(7006),new Integer(7041));
+				translations.put(new Integer(7007),new Integer(7032));
+				translations.put(new Integer(7003),new Integer(7008));
+				translations.put(new Integer(7000),new Integer(7054));
+				translations.put(new Integer(7004),new Integer(7053));
+				translations.put(new Integer(7002),new Integer(7000));
+				translations.put(new Integer(7014),new Integer(7034));
+				translations.put(new Integer(7017),new Integer(7010));
+				translations.put(new Integer(7015),new Integer(7022));
+				translations.put(new Integer(7012),new Integer(7018));
+				translations.put(new Integer(7018),new Integer(7044));
+				translations.put(new Integer(7016),new Integer(7012));
+				translations.put(new Integer(7019),new Integer(7045));
+				translations.put(new Integer(7011),new Integer(7021));
+				
+				translations.put(new Integer(7010),new Integer(7039));
+				translations.put(new Integer(7020),new Integer(7025));
+				translations.put(new Integer(7021),new Integer(7028));
+				translations.put(new Integer(7022),new Integer(7013));
+				translations.put(new Integer(7023),new Integer(7042));
+				translations.put(new Integer(7024),new Integer(7015));
+				translations.put(new Integer(7026),new Integer(7005));
+				translations.put(new Integer(7025),new Integer(7036));
+				translations.put(new Integer(7027),new Integer(7031));
+				translations.put(new Integer(7013),new Integer(7026));
+				translations.put(new Integer(7009),new Integer(7048));
+				translations.put(new Integer(7008),new Integer(7035));
+				translations.put(new Integer(7031),new Integer(7029));
+				translations.put(new Integer(7036),new Integer(7043));
+				translations.put(new Integer(7035),new Integer(7038));
+				translations.put(new Integer(7028),new Integer(7019));
+				translations.put(new Integer(7030),new Integer(7020));
+				translations.put(new Integer(7029),new Integer(7037));
+				translations.put(new Integer(7032),new Integer(7017));
+				translations.put(new Integer(7033),new Integer(7016));
+				translations.put(new Integer(7034),new Integer(7004));
+				translations.put(new Integer(7044),new Integer(7027));
+				translations.put(new Integer(7037),new Integer(7023));
+				translations.put(new Integer(7038),new Integer(7014));
+				translations.put(new Integer(7041),new Integer(7024));
+				translations.put(new Integer(7043),new Integer(7007));
+				translations.put(new Integer(7039),new Integer(7003));
+				translations.put(new Integer(7040),new Integer(7046));
+				translations.put(new Integer(7042),new Integer(7030));*/
+
+
+				
+				
+				
+			
 
 				// change block ids
-				SwingWorker<Void,Void> worker = new SwingWorker<Void, Void>() {
+				SwingWorker worker = new SwingWorker() {
 					@Override
-					protected Void doInBackground() throws Exception {
-						changeIDs(regionFiles, translations);
+					protected Object doInBackground() throws Exception {
+						changeIDs(regionFiles, datFiles, translations);
 						return null;
 					}
 				};
 				// worker.addPropertyChangeListener(this);
 				worker.execute();
-				f=new File(saveGames.get(saveIndex),"convertedto1_2");
-				if(!f.exists()){
-					f.createNewFile();
-				}
 			} catch (IOException e1) {
 				ErrorHandler.logError(e1);
+			} finally {
+				if (log != null) {
+					try {
+						log.close();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+				if (fstream != null) {
+					try {
+						fstream.close();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
 			}
 		}
 	}
+
+
 
 	/**
 	 * Changes IDs in the given region files
@@ -401,10 +521,17 @@ public class IDChanger extends JFrame implements ActionListener {
 	 * @throws IOException
 	 */
 	public void changeIDs(ArrayList<RegionFile> regionFiles,
+			ArrayList<PlayerFile> datFiles,
 			HashMap<Integer, Integer> translations) throws IOException {
+		changedChest = 0;
+		changedPlaced = 0;
+		changedPlayer = 0;
 		try {
 
 			long beginTime = System.currentTimeMillis();
+
+			// player inventories
+			convertPlayerInventories(datFiles, translations);
 			// PROGESSBAR FILE
 			int count_file = 0;
 			if (regionFiles == null) {
@@ -449,7 +576,9 @@ public class IDChanger extends JFrame implements ActionListener {
 					TIS.close();
 					// Find blocks
 					convertRegion(root, translations);
-					
+					// find blocks and items in chest etc. inventory
+					convertItems(root, translations);
+
 					// Write chunks
 					DataOutputStream output = rf.getChunkDataOutputStream(p.x,
 							p.y);
@@ -463,49 +592,186 @@ public class IDChanger extends JFrame implements ActionListener {
 			}
 
 			long duration = System.currentTimeMillis() - beginTime;
-			JOptionPane.showMessageDialog(this, "Done in " + duration + "ms",
+			JOptionPane.showMessageDialog(
+					this,
+					"Done in " + duration + "ms"
+							+ System.getProperty("line.separator")
+							+ changedPlaced + " placed blocks changed."
+							+ System.getProperty("line.separator")
+							+ changedPlayer
+							+ " blocks in player inventories changed."
+							+ System.getProperty("line.separator")
+							+ changedChest
+							+ " blocks in entity inventories changed.",
 					"Information", JOptionPane.INFORMATION_MESSAGE);
 		} catch (NullPointerException npe) {
 			ErrorHandler.logError(npe);
 			JOptionPane
-			.showMessageDialog(
-					this,
-					"A serious error has occured, an errorlog should have been created. Please report this on the MC forum thread.",
-					"Information",
-					JOptionPane.INFORMATION_MESSAGE);
+					.showMessageDialog(
+							this,
+							"A serious error has occured, an errorlog should have been created. Please report this on the MC forum thread.",
+							"Information", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 
+	public void convertPlayerInventories(ArrayList<PlayerFile> datFiles,
+			HashMap<Integer, Integer> translations) {
+		try {
 
-	public void convertRegion(Tag root,final HashMap<Integer, Integer> translations) {
+			pb_file.setMaximum(datFiles.size() - 1);
+			int count_file = 0;
+
+			for (PlayerFile df : datFiles) {
+
+				pb_file.setValue(count_file++);
+				lb_file.setText("Current File: " + df.getName());
+				DataInputStream dfinput = getLevelDataInputStream(df);
+				TagInputStream tis = new TagInputStream(dfinput);
+				Tag dfroot;
+
+				dfroot = tis.readTag(true);
+
+				ArrayList<Tag> items = new ArrayList<Tag>();
+				dfroot.findAllChildrenByName(items, "Inventory", true);
+				HashMap<Integer, Integer> indexToBlockIDs;
+				for (Tag t2 : items) {
+					indexToBlockIDs = new HashMap<Integer, Integer>();
+					if (t2 instanceof TagList) {
+						ArrayList<Tag> ids = new ArrayList<Tag>();
+						t2.findAllChildrenByName(ids, "id", true);
+						for (int i = 0; i < ids.size(); i++) {
+							Tag id = ids.get(i);
+							if (id instanceof TagShort) {
+								TagShort idShort = (TagShort) id;
+								if (translations.containsKey(Integer
+										.valueOf(idShort.payload))) {
+									Integer toval = translations.get(Integer
+											.valueOf(idShort.payload));
+									if (toval != null) {
+										changedPlayer++;
+										indexToBlockIDs.put(Integer.valueOf(i),
+												toval);
+									} else {
+										ErrorHandler.logError("null target for"
+												+ idShort.payload);
+									}
+								}
+							}
+						}
+						// update nbt tree
+						Set<Integer> set = indexToBlockIDs.keySet();
+						for (Integer i : set) {
+							((TagShort) ids.get(i)).payload = indexToBlockIDs
+									.get(i).shortValue();
+						}
+					}
+				}
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				DataOutputStream dfoutput = new DataOutputStream(
+						new GZIPOutputStream(bos));
+				(new TagOutputStream(dfoutput)).writeTag(dfroot, true);
+				dfoutput.close();
+				df.seek(0);
+				df.write(bos.toByteArray());
+				df.close();
+				dfinput.close();
+				tis.close();
+			}
+		} catch (IOException e) {
+			ErrorHandler.logError(e);
+		}
+
+	}
+
+	public void convertRegion(Tag root,
+			final HashMap<Integer, Integer> translations) {
 		Tag t = root.findChildByName("Blocks", true);
 		if (t instanceof TagByteArray) {
 			TagByteArray blocks = (TagByteArray) t;
 			HashMap<Integer, Integer> indexToBlockIDs;
 			indexToBlockIDs = new HashMap<Integer, Integer>();
-			for (int i = 0; i < blocks.payload.length; i++) {	
-				Integer bID = Integer.valueOf(
-						0x000000FF & (int) (blocks.payload[i]));
+			for (int i = 0; i < blocks.payload.length; i++) {
+				Integer bID = Integer
+						.valueOf(0x000000FF & (int) (blocks.payload[i]));
 				if (translations.containsKey(bID)) {
 					// Only allow blocks to be replaced with
 					// blocks
 					if (translations.get(bID) <= 255) {
+						changedPlaced++;
 						indexToBlockIDs.put(Integer.valueOf(i),
 								translations.get(bID));
 					}
 				}
 			}
-			
+
 			// write changes to nbt tree
-			Set<Map.Entry<Integer,Integer>> set = indexToBlockIDs.entrySet();
-			for (Entry<Integer,Integer> entry : set) {
+			Set<Map.Entry<Integer, Integer>> set = indexToBlockIDs.entrySet();
+			for (Entry<Integer, Integer> entry : set) {
 				blocks.payload[entry.getKey()] = entry.getValue().byteValue();
 			}
-			for (Entry<Integer,Integer> entry : set) {
-				if((byte)blocks.payload[entry.getKey()] != (byte)entry.getValue().byteValue()){
-					ErrorHandler.logError(entry.getKey()+" not converted to "+entry.getValue());
+			for (Entry<Integer, Integer> entry : set) {
+				if ((byte) blocks.payload[entry.getKey()] != (byte) entry
+						.getValue().byteValue()) {
+					ErrorHandler.logError(entry.getKey() + " not converted to "
+							+ entry.getValue());
 				}
 			}
+			// System.out.print("test");
+		}
+	}
+
+	public void convertItems(Tag root, HashMap<Integer, Integer> translations) {
+		HashMap<Integer, Integer> indexToBlockIDs;
+		ArrayList<Tag> items = new ArrayList<Tag>();
+		root.findAllChildrenByName(items, "Items", true);
+		for (Tag t2 : items) {
+			if (t2 instanceof TagList) {
+				ArrayList<Tag> ids = new ArrayList<Tag>();
+				t2.findAllChildrenByName(ids, "id", true);
+				indexToBlockIDs = new HashMap<Integer, Integer>();
+				for (int i = 0; i < ids.size(); i++) {
+					Tag id = ids.get(i);
+					if (id instanceof TagShort) {
+						TagShort idShort = (TagShort) id;
+						if (translations.containsKey(Integer
+								.valueOf(idShort.payload))) {
+							Integer toval = translations.get(Integer
+									.valueOf(idShort.payload));
+							if (toval != null) {
+								changedChest++;
+								indexToBlockIDs.put(Integer.valueOf(i), toval);
+							} else {
+								System.err.println("null target");
+								ErrorHandler
+										.logError("null Target while converting items");
+							}
+						}
+					}
+				}
+				// update nbt tree
+				Set<Integer> set = indexToBlockIDs.keySet();
+				for (Integer i : set) {
+					((TagShort) ids.get(i)).payload = indexToBlockIDs.get(i)
+							.shortValue();
+				}
+			}
+		}
+	}
+
+	public DataInputStream getLevelDataInputStream(RandomAccessFile f) {
+		try {
+			// might crash if file is HUGE
+			byte[] data = new byte[(int) (f.length() - 1)];
+			f.read(data);
+			DataInputStream ret = new DataInputStream(new GZIPInputStream(
+					new ByteArrayInputStream(data)));
+			// debug("READ", x, z, " = found");
+			return ret;
+
+		} catch (IOException e) {
+			// debugln("READ", x, z, "exception");
+			ErrorHandler.logError(e);
+			return null;
 		}
 	}
 
@@ -515,7 +781,6 @@ public class IDChanger extends JFrame implements ActionListener {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 		}
-		@SuppressWarnings("unused")
-		IDChanger frame = new IDChanger("Tekkit 1.1.4 to 1.2 world converter - by havocx42");
+		IDChanger frame = new IDChanger("Tekkit 1.1.4 to 2.0 world converter - by havocx42");
 	}
 }

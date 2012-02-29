@@ -42,6 +42,12 @@ public class NBTFileIO {
 			throws IOException {
 		// Switch to the "region" folder
 		File regionDir = new File(baseFolder, "region");
+		if(!regionDir.exists()){
+			regionDir= new File(baseFolder,"DIM1/region");
+		}
+		if(!regionDir.exists()){
+			regionDir= new File(baseFolder,"DIM-1/region");
+		}
 
 		// Create a filter to only include mcr-files
 		FileFilter mcrFiles = new FileFilter() {
