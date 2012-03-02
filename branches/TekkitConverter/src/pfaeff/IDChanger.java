@@ -22,7 +22,6 @@ package pfaeff;
 
 import havocx42.ErrorHandler;
 import havocx42.PlayerFile;
-import havocx42.TranslationRecord;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -417,6 +416,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				translations.put(new Integer(208),new Integer(213));
 				translations.put(new Integer(208),new Integer(213));
 				translations.put(new Integer(196),new Integer(255));
+				translations.put(new Integer(218),new Integer(226));
 				
 				
 				/*translations.put(new Integer(7048),new Integer(7055));
