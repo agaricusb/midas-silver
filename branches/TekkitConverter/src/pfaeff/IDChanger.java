@@ -408,8 +408,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				// Create file
 				
 				translations.put(new Integer(177),new Integer(135));
-				translations.put(new Integer(188),new Integer(124));
-				translations.put(new Integer(189),new Integer(125));
+				translations.put(new Integer(189),new Integer(187));
 				translations.put(new Integer(190),new Integer(123));
 				translations.put(new Integer(206),new Integer(211));
 				translations.put(new Integer(207),new Integer(212));
@@ -781,6 +780,6 @@ public class IDChanger extends JFrame implements ActionListener {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 		}
-		IDChanger frame = new IDChanger("Tekkit 1.1.4 to 2.0 world converter - by havocx42");
+		IDChanger frame = new IDChanger("Tekkit 1.1.4 to 2.0/2.1 world converter - by havocx42");
 	}
 }
