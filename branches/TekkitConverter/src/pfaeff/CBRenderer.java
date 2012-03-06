@@ -38,7 +38,8 @@ public class CBRenderer extends JLabel implements ListCellRenderer {
 
 	@Override
 	public Component getListCellRendererComponent(JList list, Object value,	int index, boolean isSelected, boolean cellHasFocus) {
-		setText(((File)value).getName());
+		if (value==null)setText("");
+		else setText(((File)value).getName());
 		setOpaque(true);
 		if ((index % 2) == 1) {
 			setBackground(new Color(0.6f, 1.0f, 0.6f));
