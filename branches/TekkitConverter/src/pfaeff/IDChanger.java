@@ -417,6 +417,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				translations.put(new Integer(196),new Integer(255));
 				translations.put(new Integer(218),new Integer(226));
 				translations.put(new Integer(187),new Integer(189));
+				translations.put(new Integer(177),new Integer(135));
 				
 				
 				//thanks to HalibutBarn for these
