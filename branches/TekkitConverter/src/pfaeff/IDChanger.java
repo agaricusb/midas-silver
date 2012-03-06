@@ -30,53 +30,36 @@ import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-import java.util.zip.InflaterInputStream;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
-import javax.swing.text.ChangedCharSetException;
-
 import nbt.Tag;
 import nbt.TagByteArray;
 import nbt.TagInputStream;
@@ -89,23 +72,24 @@ import region.RegionFile;
  * TODO: Clean up, isolate visualization from logic and data
  */
 public class IDChanger extends JFrame implements ActionListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1677699709541264391L;
+	/**
+	 * 
+	 */
 	private ArrayList<File> saveGames = new ArrayList<File>();
-	private ArrayList<String> idNames = new ArrayList<String>();
-	private static final int VERSION_GZIP = 1;
-	private static final int VERSION_DEFLATE = 2;
+
 	public int changedPlaced = 0;
 	public int changedChest = 0;
 	public int changedPlayer = 0;
 
 	// Gui Elements
 	private JComboBox cb_selectSaveGame;
-	private JComboBox cb_selectSourceID;
-	private JComboBox cb_selectTargetID;
 
-	private JCheckBox c_backup;
 
 	DefaultListModel model = new DefaultListModel();
-	private JList li_ID;
 
 	private JLabel lb_file;
 	private JLabel lb_chunk;
@@ -117,7 +101,6 @@ public class IDChanger extends JFrame implements ActionListener {
 
 		// Init Data
 		initSaveGames();
-		initIDNames();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -135,23 +118,6 @@ public class IDChanger extends JFrame implements ActionListener {
 		File mcSavePath = getMCSavePath();
 		if (mcSavePath.exists()) {
 			saveGames = FileTools.getSubDirectories(mcSavePath);
-		}
-	}
-
-	private void initIDNames() {
-		try {
-			String path = IDChanger.class.getProtectionDomain().getCodeSource()
-					.getLocation().toURI().getPath();
-			File f = new File((new File(path)).getParent(), "IDNames.txt");
-			if (f.exists()) {
-				try {
-					readFile(f);
-				} catch (IOException e) {
-					ErrorHandler.logError(e);
-				}
-			}
-		} catch (URISyntaxException e1) {
-			ErrorHandler.logError(e1);
 		}
 	}
 
@@ -237,7 +203,7 @@ public class IDChanger extends JFrame implements ActionListener {
 		CBRenderer renderer = new CBRenderer();
 		renderer.maxIndex = names.length - 1;
 
-		cb_selectSaveGame = new JComboBox(names);
+		cb_selectSaveGame = new JComboBox(saveGames.toArray());
 		cb_selectSaveGame.setRenderer(renderer);
 		cb_selectSaveGame.addActionListener(this);
 		return cb_selectSaveGame;
@@ -287,40 +253,6 @@ public class IDChanger extends JFrame implements ActionListener {
 
 	}
 
-	private ArrayList<String> readFile(File f) throws IOException {
-		ArrayList<String> result = new ArrayList<String>();
-		BufferedReader br = new BufferedReader(new FileReader(f));
-		String line = br.readLine();
-		int index = 0;
-		while (line != null) {
-			/*
-			 * if (!line.equals("")) { line = " " + line; } line = index + line;
-			 */
-			try {
-				if (line.contains(" ")) {
-					Integer.parseInt(line.substring(0, line.indexOf(" ")));
-					result.add(line);
-				}
-			} catch (NumberFormatException e) {
-				JOptionPane
-						.showMessageDialog(
-								this,
-								"That's not how you format IDNames \"" + line
-										+ System.getProperty("line.separator")
-										+ "example:"
-										+ System.getProperty("line.separator")
-										+ "1 stone", "Error",
-								JOptionPane.ERROR_MESSAGE);
-				ErrorHandler
-						.logError("User tried to input IDNames, no big deal");
-			}
-			line = br.readLine();
-			index++;
-		}
-		br.close();
-		return result;
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// something changed - reset progress bars
@@ -339,7 +271,7 @@ public class IDChanger extends JFrame implements ActionListener {
 					if (!saveGames.contains(f)) {
 						saveGames.add(f);
 
-						cb_selectSaveGame.addItem(f.getName());
+						cb_selectSaveGame.addItem(f);
 						cb_selectSaveGame.setSelectedIndex(cb_selectSaveGame
 								.getItemCount() - 1);
 
@@ -386,7 +318,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				}
 
 				File f;
-				f=new File(saveGames.get(saveIndex),"convertedto1_2");
+				f=new File(((File)cb_selectSaveGame.getSelectedItem()),"convertedto2_1");
 				if(f.exists()){
 					JOptionPane.showMessageDialog(this, "World already converted. To force another conversion delete convertedto1_2 file in save directory",
 							"Information", JOptionPane.INFORMATION_MESSAGE);
@@ -394,9 +326,9 @@ public class IDChanger extends JFrame implements ActionListener {
 				}
 				
 				final ArrayList<RegionFile> regionFiles = NBTFileIO
-						.getRegionFiles(saveGames.get(saveIndex));
+						.getRegionFiles((File)cb_selectSaveGame.getSelectedItem());
 				final ArrayList<PlayerFile> datFiles = NBTFileIO
-						.getDatFiles(saveGames.get(saveIndex));
+						.getDatFiles((File)cb_selectSaveGame.getSelectedItem());
 				// Backup savegame
 				// if (c_backup.isSelected()) {
 				// backUpSaveGame(saveGames.get(saveIndex));
@@ -405,8 +337,8 @@ public class IDChanger extends JFrame implements ActionListener {
 				// new version use a hashmap to record what blocks to transmute
 				// to what.
 				final HashMap<Integer, Integer> translations = new HashMap<Integer, Integer>();
-				// Create file
 				
+				//hardcoded translations for update.
 				translations.put(new Integer(177),new Integer(135));
 				translations.put(new Integer(189),new Integer(187));
 				translations.put(new Integer(190),new Integer(123));
@@ -419,8 +351,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				translations.put(new Integer(187),new Integer(189));
 				translations.put(new Integer(177),new Integer(135));
 				
-				
-				//thanks to HalibutBarn for these
+				//thanks to HalibutBarn for these railcraft changes
 				translations.put(new Integer(7256),new Integer(7310)); // Crowbar
                 translations.put(new Integer(7258),new Integer(7256)); // Signal tuner
                 translations.put(new Integer(7259),new Integer(7264)); // Creosote oil
@@ -478,14 +409,14 @@ public class IDChanger extends JFrame implements ActionListener {
 			
 
 				// change block ids
-				SwingWorker worker = new SwingWorker() {
+				SwingWorker<?, ?> worker = new SwingWorker<Object, Object>() {
 					@Override
 					protected Object doInBackground() throws Exception {
 						changeIDs(regionFiles, datFiles, translations);
 						return null;
 					}
 				};
-				// worker.addPropertyChangeListener(this);
+				f.createNewFile();
 				worker.execute();
 			} catch (IOException e1) {
 				ErrorHandler.logError(e1);
@@ -782,6 +713,7 @@ public class IDChanger extends JFrame implements ActionListener {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 		}
+		@SuppressWarnings("unused")
 		IDChanger frame = new IDChanger("Tekkit 1.1.4 to 2.0/2.1 world converter - by havocx42");
 	}
 }

@@ -22,6 +22,7 @@ package pfaeff;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.io.File;
 
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -37,7 +38,7 @@ public class CBRenderer extends JLabel implements ListCellRenderer {
 
 	@Override
 	public Component getListCellRendererComponent(JList list, Object value,	int index, boolean isSelected, boolean cellHasFocus) {
-		setText(value.toString());
+		setText(((File)value).getName());
 		setOpaque(true);
 		if ((index % 2) == 1) {
 			setBackground(new Color(0.6f, 1.0f, 0.6f));
