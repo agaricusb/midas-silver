@@ -416,58 +416,59 @@ public class IDChanger extends JFrame implements ActionListener {
 				translations.put(new Integer(208),new Integer(213));
 				translations.put(new Integer(196),new Integer(255));
 				translations.put(new Integer(218),new Integer(226));
+				translations.put(new Integer(187),new Integer(189));
 				
 				
-				/*translations.put(new Integer(7048),new Integer(7055));
-				translations.put(new Integer(7049),new Integer(7047));
-				translations.put(new Integer(7047),new Integer(7051));
-				translations.put(new Integer(7046),new Integer(7052));
-				translations.put(new Integer(7045),new Integer(7009));
-				translations.put(new Integer(7005),new Integer(7006));
-				translations.put(new Integer(7006),new Integer(7041));
-				translations.put(new Integer(7007),new Integer(7032));
-				translations.put(new Integer(7003),new Integer(7008));
-				translations.put(new Integer(7000),new Integer(7054));
-				translations.put(new Integer(7004),new Integer(7053));
-				translations.put(new Integer(7002),new Integer(7000));
-				translations.put(new Integer(7014),new Integer(7034));
-				translations.put(new Integer(7017),new Integer(7010));
-				translations.put(new Integer(7015),new Integer(7022));
-				translations.put(new Integer(7012),new Integer(7018));
-				translations.put(new Integer(7018),new Integer(7044));
-				translations.put(new Integer(7016),new Integer(7012));
-				translations.put(new Integer(7019),new Integer(7045));
-				translations.put(new Integer(7011),new Integer(7021));
-				
-				translations.put(new Integer(7010),new Integer(7039));
-				translations.put(new Integer(7020),new Integer(7025));
-				translations.put(new Integer(7021),new Integer(7028));
-				translations.put(new Integer(7022),new Integer(7013));
-				translations.put(new Integer(7023),new Integer(7042));
-				translations.put(new Integer(7024),new Integer(7015));
-				translations.put(new Integer(7026),new Integer(7005));
-				translations.put(new Integer(7025),new Integer(7036));
-				translations.put(new Integer(7027),new Integer(7031));
-				translations.put(new Integer(7013),new Integer(7026));
-				translations.put(new Integer(7009),new Integer(7048));
-				translations.put(new Integer(7008),new Integer(7035));
-				translations.put(new Integer(7031),new Integer(7029));
-				translations.put(new Integer(7036),new Integer(7043));
-				translations.put(new Integer(7035),new Integer(7038));
-				translations.put(new Integer(7028),new Integer(7019));
-				translations.put(new Integer(7030),new Integer(7020));
-				translations.put(new Integer(7029),new Integer(7037));
-				translations.put(new Integer(7032),new Integer(7017));
-				translations.put(new Integer(7033),new Integer(7016));
-				translations.put(new Integer(7034),new Integer(7004));
-				translations.put(new Integer(7044),new Integer(7027));
-				translations.put(new Integer(7037),new Integer(7023));
-				translations.put(new Integer(7038),new Integer(7014));
-				translations.put(new Integer(7041),new Integer(7024));
-				translations.put(new Integer(7043),new Integer(7007));
-				translations.put(new Integer(7039),new Integer(7003));
-				translations.put(new Integer(7040),new Integer(7046));
-				translations.put(new Integer(7042),new Integer(7030));*/
+				//thanks to HalibutBarn for these
+				translations.put(new Integer(7256),new Integer(7310)); // Crowbar
+                translations.put(new Integer(7258),new Integer(7256)); // Signal tuner
+                translations.put(new Integer(7259),new Integer(7264)); // Creosote oil
+                translations.put(new Integer(7260),new Integer(7309)); // Signal lamp
+                translations.put(new Integer(7261),new Integer(7262)); // Controller circuit
+                translations.put(new Integer(7262),new Integer(7297)); // Receiver circuit
+                translations.put(new Integer(7263),new Integer(7288)); // Coal coke
+                translations.put(new Integer(7264),new Integer(7291)); // Wooden tie
+                translations.put(new Integer(7265),new Integer(7304)); // Stone tie
+                translations.put(new Integer(7266),new Integer(7295)); // Wooden railbed
+                translations.put(new Integer(7267),new Integer(7277)); // Stone railbed
+                translations.put(new Integer(7268),new Integer(7274)); // Junction rail
+                translations.put(new Integer(7269),new Integer(7282)); // Switch rail
+                translations.put(new Integer(7270),new Integer(7290)); // Boarding rail
+                translations.put(new Integer(7271),new Integer(7278)); // Holding rail
+                translations.put(new Integer(7272),new Integer(7268)); // One-way rail
+                translations.put(new Integer(7273),new Integer(7266)); // Control rail
+                translations.put(new Integer(7274),new Integer(7300)); // Launcher rail
+                translations.put(new Integer(7275),new Integer(7301)); // Priming rail
+                translations.put(new Integer(7276),new Integer(7281)); // Wooden rail
+                translations.put(new Integer(7277),new Integer(7284)); // Wooden booster rail
+                translations.put(new Integer(7278),new Integer(7269)); // Wooden junction rail
+                translations.put(new Integer(7279),new Integer(7298)); // Wooden switch rail
+                translations.put(new Integer(7280),new Integer(7271)); // High-speed rail
+                translations.put(new Integer(7281),new Integer(7292)); // High-speed switch rail
+                translations.put(new Integer(7282),new Integer(7261)); // High-speed booster rail
+                translations.put(new Integer(7283),new Integer(7287)); // High-speed transition rail
+                translations.put(new Integer(7284),new Integer(7275)); // Metal posts
+                translations.put(new Integer(7285),new Integer(7293)); // Wood posts
+                translations.put(new Integer(7286),new Integer(7276)); // Stone post
+                translations.put(new Integer(7287),new Integer(7285)); // Concrete block
+                translations.put(new Integer(7288),new Integer(7273)); // Block signal
+                translations.put(new Integer(7289),new Integer(7272)); // Dual-head block signal
+                translations.put(new Integer(7290),new Integer(7260)); // Switch motor
+                translations.put(new Integer(7291),new Integer(7294)); // Signal receiver box
+                translations.put(new Integer(7292),new Integer(7299)); // Signal controller box
+                translations.put(new Integer(7293),new Integer(7279)); // Minecart loader
+                translations.put(new Integer(7294),new Integer(7270)); // Advanced Loader
+                translations.put(new Integer(7295),new Integer(7259)); // Minecart unloader
+                translations.put(new Integer(7296),new Integer(7302)); // Advanced unloader
+                translations.put(new Integer(7297),new Integer(7280)); // Minecart liquid loader
+                translations.put(new Integer(7298),new Integer(7286)); // Minecart liquid unloader
+                translations.put(new Integer(7299),new Integer(7263)); // Minecart dispenser
+                translations.put(new Integer(7300),new Integer(7283)); // Coke oven brick
+                translations.put(new Integer(7301),new Integer(7265)); // TNT cart
+                translations.put(new Integer(7302),new Integer(7308)); // Tank cart
+                translations.put(new Integer(7303),new Integer(7307)); // Tunnel bore
+                translations.put(new Integer(7304),new Integer(7311)); // Diamond bore head
+                translations.put(new Integer(7305),new Integer(7303)); // Iron bore head
 
 
 				
