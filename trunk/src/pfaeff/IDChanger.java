@@ -21,6 +21,7 @@
 package pfaeff;
 
 import havocx42.ErrorHandler;
+import havocx42.FileListCellRenderer;
 import havocx42.PlayerFile;
 import havocx42.TranslationRecord;
 
@@ -330,10 +331,10 @@ public class IDChanger extends JFrame implements ActionListener {
 		}
 
 		// Set initial number of saves for rendering
-		CBRenderer renderer = new CBRenderer();
+		FileListCellRenderer renderer = new FileListCellRenderer();
 		renderer.maxIndex = names.length - 1;
 
-		cb_selectSaveGame = new JComboBox(names);
+		cb_selectSaveGame = new JComboBox(saveGames.toArray());
 		cb_selectSaveGame.setRenderer(renderer);
 		cb_selectSaveGame.addActionListener(this);
 		return cb_selectSaveGame;
@@ -435,7 +436,7 @@ public class IDChanger extends JFrame implements ActionListener {
 					if (!saveGames.contains(f)) {
 						saveGames.add(f);
 
-						cb_selectSaveGame.addItem(f.getName());
+						cb_selectSaveGame.addItem(f);
 						cb_selectSaveGame.setSelectedIndex(cb_selectSaveGame
 								.getItemCount() - 1);
 
@@ -1037,6 +1038,6 @@ public class IDChanger extends JFrame implements ActionListener {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 		}
-		IDChanger frame = new IDChanger("mIDas *GOLD* V0.1.8 ");
+		IDChanger frame = new IDChanger("mIDas *GOLD* V0.1.9 ");
 	}
 }
