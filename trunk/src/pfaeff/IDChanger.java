@@ -20,10 +20,7 @@
 
 package pfaeff;
 
-import havocx42.ErrorHandler;
-import havocx42.FileListCellRenderer;
-import havocx42.PlayerFile;
-import havocx42.TranslationRecord;
+import havocx42.*;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -107,12 +104,12 @@ public class IDChanger extends JFrame implements ActionListener {
 	private JCheckBox c_backup;
 
 	DefaultListModel model = new DefaultListModel();
-	private JList li_ID;
+	public JList li_ID;
 
-	private JLabel lb_file;
-	private JLabel lb_chunk;
-	private JProgressBar pb_file;
-	private JProgressBar pb_chunk;
+	public JLabel lb_file;
+	public JLabel lb_chunk;
+	public JProgressBar pb_file;
+	public JProgressBar pb_chunk;
 
 	public IDChanger(String title) {
 		super(title);
@@ -493,7 +490,7 @@ public class IDChanger extends JFrame implements ActionListener {
 						TranslationRecord tr;
 						while ((strLine = br.readLine()) != null) {
 							try {
-								tr = createTranslationRecord(strLine);
+								tr = TranslationRecordFactory.createTranslationRecord(strLine);
 								if (tr != null) {
 									addTranslation(tr);
 								} else {
@@ -534,7 +531,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				String currentTarget = (String) cb_selectTargetID
 						.getSelectedItem();
 
-				TranslationRecord tr = createTranslationRecord(currentSource,
+				TranslationRecord tr = TranslationRecordFactory.createTranslationRecord(currentSource,
 						currentTarget);
 				if (tr != null) {
 					addTranslation(tr);
@@ -591,15 +588,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				if (saveIndex < 0) {
 					return;
 				}
-
-				final ArrayList<RegionFile> regionFiles = NBTFileIO
-						.getRegionFiles(saveGames.get(saveIndex));
-				final ArrayList<PlayerFile> datFiles = NBTFileIO
-						.getDatFiles(saveGames.get(saveIndex));
-				// Backup savegame
-				// if (c_backup.isSelected()) {
-				// backUpSaveGame(saveGames.get(saveIndex));
-				// }
+				final World world = new World(saveGames.get(saveIndex));
 
 				if (model.size() == 0) {
 					JOptionPane.showMessageDialog(this,
@@ -646,12 +635,12 @@ public class IDChanger extends JFrame implements ActionListener {
 				 * current.indexOf(" ")); } final short targetID =
 				 * (short)Integer.parseInt(current);
 				 */
-
+				final IDChanger UI = this;
 				// change block ids
 				SwingWorker worker = new SwingWorker() {
 					@Override
 					protected Object doInBackground() throws Exception {
-						changeIDs(regionFiles, datFiles, translations);
+						world.convert(UI,translations);
 						return null;
 					}
 				};
@@ -680,53 +669,7 @@ public class IDChanger extends JFrame implements ActionListener {
 		}
 	}
 
-	private TranslationRecord createTranslationRecord(String current) {
-		if (current.contains("->")) {
-			int index = current.indexOf("->");
-			String currentSource = current.substring(0, index );
-			String currentTarget = current.substring(index + 3);
-			return createTranslationRecord(currentSource, currentTarget);
-		} else {
-			return null;
-		}
 
-	}
-
-	private TranslationRecord createTranslationRecord(String sourceString,
-			String targetString) {
-		if(sourceString.contains("->")||targetString.contains("->"))return null;
-		int sourceSpaceIndex;
-		Integer source;
-		String sourceName;
-		if (sourceString.contains(" ")) {
-			sourceSpaceIndex = sourceString.indexOf(' ');
-			source = Integer.valueOf(sourceString
-					.substring(0, sourceSpaceIndex));
-			sourceName = sourceString.substring(sourceSpaceIndex);
-		} else {
-			source = Integer.valueOf(sourceString);
-			sourceName = "";
-		}
-
-		int targetSpaceIndex;
-		Integer target;
-		String targetName;
-		if (targetString.contains(" ")) {
-			targetSpaceIndex = targetString.indexOf(' ');
-			target = Integer.valueOf(targetString
-					.substring(0, targetSpaceIndex));
-			targetName = targetString.substring(targetSpaceIndex);
-		} else {
-			target = Integer.valueOf(targetString);
-			targetName = "";
-		}
-
-		if (target != null && source != null) {
-			return new TranslationRecord(source, target, sourceName, targetName);
-		} else {
-			return null;
-		}
-	}
 
 	private void addTranslation(TranslationRecord tr) {
 		for(int i =0;i<model.size();i++){
@@ -788,7 +731,7 @@ public class IDChanger extends JFrame implements ActionListener {
 			long beginTime = System.currentTimeMillis();
 
 			// player inventories
-			convertPlayerInventories(datFiles, translations);
+			//convertPlayerInventories(datFiles, translations);
 			// PROGESSBAR FILE
 			int count_file = 0;
 			if (regionFiles == null) {
@@ -832,9 +775,9 @@ public class IDChanger extends JFrame implements ActionListener {
 					input.close();
 					TIS.close();
 					// Find blocks
-					convertRegion(root, translations);
+					//convertRegion(root, translations);
 					// find blocks and items in chest etc. inventory
-					convertItems(root, translations);
+					//convertItems(root, translations);
 
 					// Write chunks
 					DataOutputStream output = rf.getChunkDataOutputStream(p.x,
@@ -870,7 +813,7 @@ public class IDChanger extends JFrame implements ActionListener {
 							"Information", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
-
+/*
 	public void convertPlayerInventories(ArrayList<PlayerFile> datFiles,
 			HashMap<Integer, Integer> translations) {
 		try {
@@ -1030,7 +973,7 @@ public class IDChanger extends JFrame implements ActionListener {
 			ErrorHandler.logError(e);
 			return null;
 		}
-	}
+	}*/
 
 	public static void main(String[] args) {
 		try {
