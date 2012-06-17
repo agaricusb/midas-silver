@@ -16,13 +16,14 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.swing.JOptionPane;
 
+import com.mojang.nbt.CompoundTag;
+import com.mojang.nbt.ListTag;
+import com.mojang.nbt.NbtIo;
+import com.mojang.nbt.ShortTag;
+import com.mojang.nbt.Tag;
+
 import pfaeff.IDChanger;
 
-import nbt.Tag;
-import nbt.TagInputStream;
-import nbt.TagList;
-import nbt.TagOutputStream;
-import nbt.TagShort;
 
 import region.RegionFile;
 
@@ -42,8 +43,7 @@ public class World {
 		}
 	}
 
-	public void convert(IDChanger UI, HashMap<Integer, Integer> translations)
-			throws IOException {
+	public void convert(IDChanger UI, HashMap<Integer, Integer> translations) {
 		UI.changedChest = 0;
 		UI.changedPlaced = 0;
 		UI.changedPlayer = 0;
@@ -51,7 +51,7 @@ public class World {
 		long beginTime = System.currentTimeMillis();
 
 		// player inventories
-		convertPlayerInventories(UI, translations);
+		//convertPlayerInventories(UI, translations);
 		// PROGESSBAR FILE
 		int count_file = 0;
 		if (regionFiles == null) {
@@ -62,23 +62,24 @@ public class World {
 
 		for (RegionFileExtended r : regionFiles) {
 			UI.pb_file.setValue(count_file++);
-			UI.lb_file.setText("Current File: " + r.getFile().getName());
-			r.convert(UI, translations);
+			UI.lb_file.setText("Current File: " + r.fileName);
+			try {
+				r.convert(UI, translations);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		
+		long duration = System.currentTimeMillis() - beginTime;
 		JOptionPane.showMessageDialog(
 				UI,
-				"Done in " + /* duration + */"ms"
-						+ System.getProperty("line.separator")
-						+ /* changedPlaced + */" placed blocks changed."
-						+ System.getProperty("line.separator")
-						+ /*
-						 * changedPlayer +
-						 */" blocks in player inventories changed."
-						+ System.getProperty("line.separator")
-						+ /*
-						 * changedChest +
-						 */" blocks in entity inventories changed.",
+				"Done in " + duration + "ms"
+						+ System.getProperty("line.separator") + UI.changedPlaced
+						+ " placed blocks changed."
+						+ System.getProperty("line.separator") + UI.changedPlayer
+						+ " blocks in player inventories changed."
+						+ System.getProperty("line.separator") + UI.changedChest
+						+ " blocks in entity inventories changed.",
 				"Information", JOptionPane.INFORMATION_MESSAGE);
 
 	}
@@ -180,34 +181,30 @@ public class World {
 				UI.pb_file.setValue(count_file++);
 				UI.lb_file.setText("Current File: " + df.getName());
 				DataInputStream dfinput = getLevelDataInputStream(df);
-				TagInputStream tis = new TagInputStream(dfinput);
-				Tag dfroot;
-
-				dfroot = tis.readTag(true);
-
+				CompoundTag dfroot =NbtIo.read(dfinput);
 				ArrayList<Tag> items = new ArrayList<Tag>();
 				dfroot.findAllChildrenByName(items, "Inventory", true);
 				HashMap<Integer, Integer> indexToBlockIDs;
 				for (Tag t2 : items) {
 					indexToBlockIDs = new HashMap<Integer, Integer>();
-					if (t2 instanceof TagList) {
+					if (t2 instanceof ListTag) {
 						ArrayList<Tag> ids = new ArrayList<Tag>();
 						t2.findAllChildrenByName(ids, "id", true);
 						for (int i = 0; i < ids.size(); i++) {
 							Tag id = ids.get(i);
-							if (id instanceof TagShort) {
-								TagShort idShort = (TagShort) id;
+							if (id instanceof ShortTag) {
+								ShortTag idShort = (ShortTag) id;
 								if (translations.containsKey(Integer
-										.valueOf(idShort.payload))) {
+										.valueOf(idShort.data))) {
 									Integer toval = translations.get(Integer
-											.valueOf(idShort.payload));
+											.valueOf(idShort.data));
 									if (toval != null) {
 										UI.changedPlayer++;
 										indexToBlockIDs.put(Integer.valueOf(i),
 												toval);
 									} else {
 										ErrorHandler.logError("null target for"
-												+ idShort.payload);
+												+ idShort.data);
 									}
 								}
 							}
@@ -215,7 +212,7 @@ public class World {
 						// update nbt tree
 						Set<Integer> set = indexToBlockIDs.keySet();
 						for (Integer i : set) {
-							((TagShort) ids.get(i)).payload = indexToBlockIDs
+							((ShortTag) ids.get(i)).data = indexToBlockIDs
 									.get(i).shortValue();
 						}
 					}
@@ -223,16 +220,16 @@ public class World {
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
 				DataOutputStream dfoutput = new DataOutputStream(
 						new GZIPOutputStream(bos));
-				(new TagOutputStream(dfoutput)).writeTag(dfroot, true);
+				NbtIo.writeCompressed(dfroot, dfoutput);
 				dfoutput.close();
 				df.seek(0);
 				df.write(bos.toByteArray());
 				df.close();
 				dfinput.close();
-				tis.close();
 			}
 		} catch (IOException e) {
 			ErrorHandler.logError(e);
+			System.out.println("hi");
 		}
 
 	}

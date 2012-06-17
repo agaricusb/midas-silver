@@ -7,12 +7,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import pfaeff.IDChanger;
+import com.mojang.nbt.*;
 
-import nbt.Tag;
-import nbt.TagByteArray;
-import nbt.TagList;
-import nbt.TagShort;
+import pfaeff.IDChanger;
 
 import region.RegionFile;
 
@@ -29,18 +26,18 @@ public class OldRegionFile extends RegionFileExtended {
 		ArrayList<Tag> items = new ArrayList<Tag>();
 		root.findAllChildrenByName(items, "Items", true);
 		for (Tag t2 : items) {
-			if (t2 instanceof TagList) {
+			if (t2 instanceof ListTag) {
 				ArrayList<Tag> ids = new ArrayList<Tag>();
 				t2.findAllChildrenByName(ids, "id", true);
 				indexToBlockIDs = new HashMap<Integer, Integer>();
 				for (int i = 0; i < ids.size(); i++) {
 					Tag id = ids.get(i);
-					if (id instanceof TagShort) {
-						TagShort idShort = (TagShort) id;
+					if (id instanceof ShortTag) {
+						ShortTag idShort = (ShortTag) id;
 						if (translations.containsKey(Integer
-								.valueOf(idShort.payload))) {
+								.valueOf(idShort.data))) {
 							Integer toval = translations.get(Integer
-									.valueOf(idShort.payload));
+									.valueOf(idShort.data));
 							if (toval != null) {
 								UI.changedChest++;
 								indexToBlockIDs.put(Integer.valueOf(i), toval);
@@ -55,7 +52,7 @@ public class OldRegionFile extends RegionFileExtended {
 				// update nbt tree
 				Set<Integer> set = indexToBlockIDs.keySet();
 				for (Integer i : set) {
-					((TagShort) ids.get(i)).payload = indexToBlockIDs.get(i)
+					((ShortTag) ids.get(i)).data = indexToBlockIDs.get(i)
 							.shortValue();
 				}
 			}
@@ -66,13 +63,13 @@ public class OldRegionFile extends RegionFileExtended {
 	protected void convertRegion(IDChanger UI,Tag root,
 			final HashMap<Integer, Integer> translations) {
 		Tag t = root.findChildByName("Blocks", true);
-		if (t instanceof TagByteArray) {
-			TagByteArray blocks = (TagByteArray) t;
+		if (t instanceof ByteArrayTag) {
+			ByteArrayTag blocks = (ByteArrayTag) t;
 			HashMap<Integer, Integer> indexToBlockIDs;
 			indexToBlockIDs = new HashMap<Integer, Integer>();
-			for (int i = 0; i < blocks.payload.length; i++) {
+			for (int i = 0; i < blocks.data.length; i++) {
 				Integer bID = Integer
-						.valueOf(0x000000FF & (int) (blocks.payload[i]));
+						.valueOf(0x000000FF & (int) (blocks.data[i]));
 				if (translations.containsKey(bID)) {
 					// Only allow blocks to be replaced with
 					// blocks
@@ -87,10 +84,10 @@ public class OldRegionFile extends RegionFileExtended {
 			// write changes to nbt tree
 			Set<Map.Entry<Integer, Integer>> set = indexToBlockIDs.entrySet();
 			for (Entry<Integer, Integer> entry : set) {
-				blocks.payload[entry.getKey()] = entry.getValue().byteValue();
+				blocks.data[entry.getKey()] = entry.getValue().byteValue();
 			}
 			for (Entry<Integer, Integer> entry : set) {
-				if ((byte) blocks.payload[entry.getKey()] != (byte) entry
+				if ((byte) blocks.data[entry.getKey()] != (byte) entry
 						.getValue().byteValue()) {
 					ErrorHandler.logError(entry.getKey() + " not converted to "
 							+ entry.getValue());

@@ -14,17 +14,16 @@ import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import com.mojang.nbt.CompoundTag;
+import com.mojang.nbt.NbtIo;
+import com.mojang.nbt.Tag;
+
 import pfaeff.IDChanger;
 
-import nbt.Tag;
-import nbt.TagInputStream;
-import nbt.TagList;
-import nbt.TagOutputStream;
-import nbt.TagShort;
 
 import region.RegionFile;
 
-public abstract class RegionFileExtended extends RegionFile {
+public abstract class RegionFileExtended extends region.RegionFile {
 
 	public RegionFileExtended(File path) {
 		super(path);
@@ -64,21 +63,17 @@ public abstract class RegionFileExtended extends RegionFile {
 			// Read chunks
 
 			DataInputStream input = getChunkDataInputStream(p.x, p.y);
-			TagInputStream TIS = new TagInputStream(input);
-			Tag root = TIS.readTag(true);
-			input.close();
-			TIS.close();
+			CompoundTag root = NbtIo.read(input);
 			// Find blocks
 			convertRegion(UI,root, translations);
 			// find blocks and items in chest etc. inventory
 			convertItems(UI,root, translations);
+			input.close();
 
 			// Write chunks
 			DataOutputStream output = getChunkDataOutputStream(p.x, p.y);
-			TagOutputStream tos = new TagOutputStream(output);
-			tos.writeTag(root, true);
+			NbtIo.write(root, output);
 			output.close();
-			tos.close();
 		}
 	}
 

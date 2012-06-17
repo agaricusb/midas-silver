@@ -13,6 +13,7 @@ public class ErrorHandler {
 	 * @param e An exception to have its stacktrace printed to the error file
 	 */
 	public static boolean logError(Exception e) {
+		e.printStackTrace();
 		try {
 			if (!initErrorFile()) {
 				return false;
@@ -22,6 +23,7 @@ public class ErrorHandler {
 				writer = new PrintStream(errorLog);
 				e.printStackTrace(writer);
 				writer.close();
+				
 				return true;
 			} else {
 				return false;
@@ -38,6 +40,7 @@ public class ErrorHandler {
 	 * @param s A String to be recorded in the error file
 	 */
 	public static boolean logError(String s) {
+		System.out.println(s);
 		try {
 			if (!initErrorFile()) {
 				return false;
