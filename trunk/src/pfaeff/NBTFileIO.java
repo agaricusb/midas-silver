@@ -53,7 +53,7 @@ public class NBTFileIO {
 		FileFilter mcrFiles = new FileFilter() {
 			@Override
 			public boolean accept(File pathname) {
-				if (pathname.getName().toLowerCase().endsWith("mcr")) {
+				if (pathname.getName().toLowerCase().endsWith("mcr")||pathname.getName().toLowerCase().endsWith("mca")) {
 					return true;
 				}
 				return false;

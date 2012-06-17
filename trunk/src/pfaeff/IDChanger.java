@@ -20,42 +20,29 @@
 
 package pfaeff;
 
-import havocx42.*;
+import havocx42.ErrorHandler;
+import havocx42.FileListCellRenderer;
+import havocx42.TranslationRecord;
+import havocx42.TranslationRecordFactory;
+import havocx42.World;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-import java.util.zip.InflaterInputStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -74,14 +61,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
-import javax.swing.text.ChangedCharSetException;
 
-import nbt.Tag;
-import nbt.TagByteArray;
-import nbt.TagInputStream;
-import nbt.TagList;
-import nbt.TagOutputStream;
-import nbt.TagShort;
 import region.RegionFile;
 
 /*
@@ -720,7 +700,7 @@ public class IDChanger extends JFrame implements ActionListener {
 	 *            block id as a value for that key
 	 * @throws IOException
 	 */
-	public void changeIDs(ArrayList<RegionFile> regionFiles,
+	/*public void changeIDs(ArrayList<RegionFile> regionFiles,
 			ArrayList<PlayerFile> datFiles,
 			HashMap<Integer, Integer> translations) throws IOException {
 		changedChest = 0;
@@ -981,6 +961,6 @@ public class IDChanger extends JFrame implements ActionListener {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 		}
-		IDChanger frame = new IDChanger("mIDas *GOLD* V0.1.9 ");
+		IDChanger frame = new IDChanger("mIDas *GOLD* V0.2.0 ");
 	}
 }
