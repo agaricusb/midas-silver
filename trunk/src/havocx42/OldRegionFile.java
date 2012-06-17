@@ -11,8 +11,6 @@ import com.mojang.nbt.*;
 
 import pfaeff.IDChanger;
 
-import region.RegionFile;
-
 public class OldRegionFile extends RegionFileExtended {
 
 	public OldRegionFile(File path) {

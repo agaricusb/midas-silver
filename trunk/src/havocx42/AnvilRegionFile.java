@@ -11,8 +11,6 @@ import com.mojang.nbt.*;
 
 import pfaeff.IDChanger;
 
-import region.RegionFile;
-
 public class AnvilRegionFile extends RegionFileExtended {
 
 	public AnvilRegionFile(File path) {

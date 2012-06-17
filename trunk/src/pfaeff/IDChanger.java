@@ -68,23 +68,25 @@ import region.RegionFile;
  * TODO: Clean up, isolate visualization from logic and data
  */
 public class IDChanger extends JFrame implements ActionListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 9149749206914440913L;
 	private ArrayList<File> saveGames = new ArrayList<File>();
 	private ArrayList<String> idNames = new ArrayList<String>();
-	private static final int VERSION_GZIP = 1;
-	private static final int VERSION_DEFLATE = 2;
 	public int changedPlaced = 0;
 	public int changedChest = 0;
 	public int changedPlayer = 0;
 
 	// Gui Elements
-	private JComboBox cb_selectSaveGame;
+	private JComboBox<File> cb_selectSaveGame;
 	private JComboBox cb_selectSourceID;
 	private JComboBox cb_selectTargetID;
 
 	private JCheckBox c_backup;
 
-	DefaultListModel model = new DefaultListModel();
-	public JList li_ID;
+	DefaultListModel<TranslationRecord> model = new DefaultListModel<TranslationRecord>();
+	public JList<TranslationRecord> li_ID;
 
 	public JLabel lb_file;
 	public JLabel lb_chunk;
@@ -254,8 +256,8 @@ public class IDChanger extends JFrame implements ActionListener {
 		return pn_ID;
 	}
 
-	private JList initIDTextArea() {
-		li_ID = new JList(model);
+	private JList<TranslationRecord> initIDTextArea() {
+		li_ID = new JList<TranslationRecord>(model);
 		return li_ID;
 	}
 
@@ -365,7 +367,6 @@ public class IDChanger extends JFrame implements ActionListener {
 		ArrayList<String> result = new ArrayList<String>();
 		BufferedReader br = new BufferedReader(new FileReader(f));
 		String line = br.readLine();
-		int index = 0;
 		while (line != null) {
 			/*
 			 * if (!line.equals("")) { line = " " + line; } line = index + line;
@@ -389,7 +390,6 @@ public class IDChanger extends JFrame implements ActionListener {
 						.logError("User tried to input IDNames, no big deal");
 			}
 			line = br.readLine();
-			index++;
 		}
 		br.close();
 		return result;
@@ -690,270 +690,6 @@ public class IDChanger extends JFrame implements ActionListener {
 			ErrorHandler.logError(e);
 		}
 	}
-
-	/**
-	 * Changes IDs in the given region files
-	 * 
-	 * @param regionFiles
-	 * @param translations
-	 *            hashmap containing the source block id as a key and the target
-	 *            block id as a value for that key
-	 * @throws IOException
-	 */
-	/*public void changeIDs(ArrayList<RegionFile> regionFiles,
-			ArrayList<PlayerFile> datFiles,
-			HashMap<Integer, Integer> translations) throws IOException {
-		changedChest = 0;
-		changedPlaced = 0;
-		changedPlayer = 0;
-		try {
-
-			long beginTime = System.currentTimeMillis();
-
-			// player inventories
-			//convertPlayerInventories(datFiles, translations);
-			// PROGESSBAR FILE
-			int count_file = 0;
-			if (regionFiles == null) {
-				// No valid region files found
-				return;
-			}
-			pb_file.setMaximum(regionFiles.size() - 1);
-
-			for (RegionFile rf : regionFiles) {
-				// Progress
-				pb_file.setValue(count_file++);
-				lb_file.setText("Current File: " + rf.getFile().getName());
-
-				// System.out.println("Processing file " + rf.getFile());
-				ArrayList<Point> chunks = new ArrayList<Point>();
-
-				// Get available chunks
-				for (int x = 0; x < 32; x++) {
-					for (int z = 0; z < 32; z++) {
-						if (rf.hasChunk(x, z)) {
-							chunks.add(new Point(x, z));
-						}
-					}
-				}
-
-				// PROGESSBAR CHUNK
-				pb_chunk.setMaximum(chunks.size() - 1);
-				int count_chunk = 0;
-
-				for (Point p : chunks) {
-					// Progress
-					pb_chunk.setValue(count_chunk++);
-					lb_chunk.setText("Current Chunk: (" + p.x + "; " + p.y
-							+ ")");
-					// Read chunks
-
-					DataInputStream input = rf
-							.getChunkDataInputStream(p.x, p.y);
-					TagInputStream TIS = new TagInputStream(input);
-					Tag root = TIS.readTag(true);
-					input.close();
-					TIS.close();
-					// Find blocks
-					//convertRegion(root, translations);
-					// find blocks and items in chest etc. inventory
-					//convertItems(root, translations);
-
-					// Write chunks
-					DataOutputStream output = rf.getChunkDataOutputStream(p.x,
-							p.y);
-					TagOutputStream tos = new TagOutputStream(output);
-					tos.writeTag(root, true);
-					output.close();
-					tos.close();
-
-				}
-				rf.close();
-			}
-
-			long duration = System.currentTimeMillis() - beginTime;
-			JOptionPane.showMessageDialog(
-					this,
-					"Done in " + duration + "ms"
-							+ System.getProperty("line.separator")
-							+ changedPlaced + " placed blocks changed."
-							+ System.getProperty("line.separator")
-							+ changedPlayer
-							+ " blocks in player inventories changed."
-							+ System.getProperty("line.separator")
-							+ changedChest
-							+ " blocks in entity inventories changed.",
-					"Information", JOptionPane.INFORMATION_MESSAGE);
-		} catch (NullPointerException npe) {
-			ErrorHandler.logError(npe);
-			JOptionPane
-					.showMessageDialog(
-							this,
-							"A serious error has occured, an errorlog should have been created. Please report this on the MC forum thread.",
-							"Information", JOptionPane.INFORMATION_MESSAGE);
-		}
-	}
-/*
-	public void convertPlayerInventories(ArrayList<PlayerFile> datFiles,
-			HashMap<Integer, Integer> translations) {
-		try {
-
-			pb_file.setMaximum(datFiles.size() - 1);
-			int count_file = 0;
-
-			for (PlayerFile df : datFiles) {
-
-				pb_file.setValue(count_file++);
-				lb_file.setText("Current File: " + df.getName());
-				DataInputStream dfinput = getLevelDataInputStream(df);
-				TagInputStream tis = new TagInputStream(dfinput);
-				Tag dfroot;
-
-				dfroot = tis.readTag(true);
-
-				ArrayList<Tag> items = new ArrayList<Tag>();
-				dfroot.findAllChildrenByName(items, "Inventory", true);
-				HashMap<Integer, Integer> indexToBlockIDs;
-				for (Tag t2 : items) {
-					indexToBlockIDs = new HashMap<Integer, Integer>();
-					if (t2 instanceof TagList) {
-						ArrayList<Tag> ids = new ArrayList<Tag>();
-						t2.findAllChildrenByName(ids, "id", true);
-						for (int i = 0; i < ids.size(); i++) {
-							Tag id = ids.get(i);
-							if (id instanceof TagShort) {
-								TagShort idShort = (TagShort) id;
-								if (translations.containsKey(Integer
-										.valueOf(idShort.payload))) {
-									Integer toval = translations.get(Integer
-											.valueOf(idShort.payload));
-									if (toval != null) {
-										changedPlayer++;
-										indexToBlockIDs.put(Integer.valueOf(i),
-												toval);
-									} else {
-										ErrorHandler.logError("null target for"
-												+ idShort.payload);
-									}
-								}
-							}
-						}
-						// update nbt tree
-						Set<Integer> set = indexToBlockIDs.keySet();
-						for (Integer i : set) {
-							((TagShort) ids.get(i)).payload = indexToBlockIDs
-									.get(i).shortValue();
-						}
-					}
-				}
-				ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				DataOutputStream dfoutput = new DataOutputStream(
-						new GZIPOutputStream(bos));
-				(new TagOutputStream(dfoutput)).writeTag(dfroot, true);
-				dfoutput.close();
-				df.seek(0);
-				df.write(bos.toByteArray());
-				df.close();
-				dfinput.close();
-				tis.close();
-			}
-		} catch (IOException e) {
-			ErrorHandler.logError(e);
-		}
-
-	}
-
-	public void convertRegion(Tag root,
-			final HashMap<Integer, Integer> translations) {
-		Tag t = root.findChildByName("Blocks", true);
-		if (t instanceof TagByteArray) {
-			TagByteArray blocks = (TagByteArray) t;
-			HashMap<Integer, Integer> indexToBlockIDs;
-			indexToBlockIDs = new HashMap<Integer, Integer>();
-			for (int i = 0; i < blocks.payload.length; i++) {
-				Integer bID = Integer
-						.valueOf(0x000000FF & (int) (blocks.payload[i]));
-				if (translations.containsKey(bID)) {
-					// Only allow blocks to be replaced with
-					// blocks
-					if (translations.get(bID) <= 255) {
-						changedPlaced++;
-						indexToBlockIDs.put(Integer.valueOf(i),
-								translations.get(bID));
-					}
-				}
-			}
-
-			// write changes to nbt tree
-			Set<Map.Entry<Integer, Integer>> set = indexToBlockIDs.entrySet();
-			for (Entry<Integer, Integer> entry : set) {
-				blocks.payload[entry.getKey()] = entry.getValue().byteValue();
-			}
-			for (Entry<Integer, Integer> entry : set) {
-				if ((byte) blocks.payload[entry.getKey()] != (byte) entry
-						.getValue().byteValue()) {
-					ErrorHandler.logError(entry.getKey() + " not converted to "
-							+ entry.getValue());
-				}
-			}
-			// System.out.print("test");
-		}
-	}
-
-	public void convertItems(Tag root, HashMap<Integer, Integer> translations) {
-		HashMap<Integer, Integer> indexToBlockIDs;
-		ArrayList<Tag> items = new ArrayList<Tag>();
-		root.findAllChildrenByName(items, "Items", true);
-		for (Tag t2 : items) {
-			if (t2 instanceof TagList) {
-				ArrayList<Tag> ids = new ArrayList<Tag>();
-				t2.findAllChildrenByName(ids, "id", true);
-				indexToBlockIDs = new HashMap<Integer, Integer>();
-				for (int i = 0; i < ids.size(); i++) {
-					Tag id = ids.get(i);
-					if (id instanceof TagShort) {
-						TagShort idShort = (TagShort) id;
-						if (translations.containsKey(Integer
-								.valueOf(idShort.payload))) {
-							Integer toval = translations.get(Integer
-									.valueOf(idShort.payload));
-							if (toval != null) {
-								changedChest++;
-								indexToBlockIDs.put(Integer.valueOf(i), toval);
-							} else {
-								System.err.println("null target");
-								ErrorHandler
-										.logError("null Target while converting items");
-							}
-						}
-					}
-				}
-				// update nbt tree
-				Set<Integer> set = indexToBlockIDs.keySet();
-				for (Integer i : set) {
-					((TagShort) ids.get(i)).payload = indexToBlockIDs.get(i)
-							.shortValue();
-				}
-			}
-		}
-	}
-
-	public DataInputStream getLevelDataInputStream(RandomAccessFile f) {
-		try {
-			// might crash if file is HUGE
-			byte[] data = new byte[(int) (f.length() - 1)];
-			f.read(data);
-			DataInputStream ret = new DataInputStream(new GZIPInputStream(
-					new ByteArrayInputStream(data)));
-			// debug("READ", x, z, " = found");
-			return ret;
-
-		} catch (IOException e) {
-			// debugln("READ", x, z, "exception");
-			ErrorHandler.logError(e);
-			return null;
-		}
-	}*/
 
 	public static void main(String[] args) {
 		try {
