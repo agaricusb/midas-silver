@@ -1,4 +1,5 @@
 package region;
+
 /*
  ** 2011 January 5
  **
@@ -63,6 +64,9 @@ import java.util.zip.*;
 
 public class RegionFile {
 
+    public static final String ANVIL_EXTENSION = ".mca";
+    public static final String MCREGION_EXTENSION = ".mcr";
+
     private static final int VERSION_GZIP = 1;
     private static final int VERSION_DEFLATE = 2;
 
@@ -72,7 +76,7 @@ public class RegionFile {
     static final int CHUNK_HEADER_SIZE = 5;
     private static final byte emptySector[] = new byte[4096];
 
-    private final File fileName;
+    public final File fileName;
     private RandomAccessFile file;
     private final int offsets[];
     private final int chunkTimestamps[];
@@ -216,13 +220,13 @@ public class RegionFile {
             if (version == VERSION_GZIP) {
                 byte[] data = new byte[length - 1];
                 file.read(data);
-                DataInputStream ret = new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(data)));
+                DataInputStream ret = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new ByteArrayInputStream(data))));
                 // debug("READ", x, z, " = found");
                 return ret;
             } else if (version == VERSION_DEFLATE) {
                 byte[] data = new byte[length - 1];
                 file.read(data);
-                DataInputStream ret = new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(data)));
+                DataInputStream ret = new DataInputStream(new BufferedInputStream(new InflaterInputStream(new ByteArrayInputStream(data))));
                 // debug("READ", x, z, " = found");
                 return ret;
             }
@@ -234,7 +238,6 @@ public class RegionFile {
             return null;
         }
     }
-    
 
     public DataOutputStream getChunkDataOutputStream(int x, int z) {
         if (outOfBounds(x, z)) return null;
@@ -339,7 +342,6 @@ public class RegionFile {
     /* write a chunk data to the region file at specified sector number */
     private void write(int sectorNumber, byte[] data, int length) throws IOException {
         debugln(" " + sectorNumber);
-        
         file.seek(sectorNumber * SECTOR_BYTES);
         file.writeInt(length + 1); // chunk length
         file.writeByte(VERSION_DEFLATE); // chunk version number
@@ -373,12 +375,5 @@ public class RegionFile {
 
     public void close() throws IOException {
         file.close();
-    }
-    
-    /*
-     * Added by pfaeff
-     */
-    public File getFile() {
-    	return fileName;
     }
 }
