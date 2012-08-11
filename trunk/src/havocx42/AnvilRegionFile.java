@@ -62,38 +62,40 @@ public class AnvilRegionFile extends RegionFileExtended {
 	protected void convertRegion(IDChanger UI, Tag root,
 			final HashMap<Integer, Integer> translations) {
 		ArrayList<Tag> result = new ArrayList<Tag>();
-		root.findAllChildrenByName(result, "Blocks", true);
-		for (Tag t : result) {
-			if (t instanceof ByteArrayTag) {
-				ByteArrayTag blocks = (ByteArrayTag) t;
-				HashMap<Integer, Integer> indexToBlockIDs;
-				indexToBlockIDs = new HashMap<Integer, Integer>();
-				for (int i = 0; i < blocks.data.length; i++) {
-					Integer bID = Integer
-							.valueOf(0x000000FF & (int) (blocks.data[i]));
-					if (translations.containsKey(bID)) {
-						// Only allow blocks to be replaced with
-						// blocks
-						if (translations.get(bID) <= 255) {
+		root.findAllChildrenByName(result, "Sections", true);
+		CompoundTag sectionTag;
+		for (Tag list : result) {
+			if (list instanceof ListTag) {
+				for (int sectionIndex = 0; sectionIndex < ((ListTag<?>) list)
+						.size(); sectionIndex++) {
+					sectionTag = ((ListTag<CompoundTag>) list)
+							.get(sectionIndex);
+					Section section = new Section(sectionTag);
+					HashMap<Integer, Integer> indexToBlockIDs;
+					indexToBlockIDs = new HashMap<Integer, Integer>();
+					for (int i = 0; i < section.length(); i++) {
+						Integer bID = section.get(i);
+						if (translations.containsKey(bID)) {
 							UI.changedPlaced++;
 							indexToBlockIDs.put(Integer.valueOf(i),
 									translations.get(bID));
 						}
 					}
-				}
 
-				// write changes to nbt tree
-				Set<Map.Entry<Integer, Integer>> set = indexToBlockIDs
-						.entrySet();
-				for (Entry<Integer, Integer> entry : set) {
-					blocks.data[entry.getKey()] = entry.getValue().byteValue();
-				}
-				for (Entry<Integer, Integer> entry : set) {
-					if ((byte) blocks.data[entry.getKey()] != (byte) entry
-							.getValue().byteValue()) {
-						ErrorHandler.logError(entry.getKey()
-								+ " not converted to " + entry.getValue());
+					// write changes to nbt tree
+					Set<Map.Entry<Integer, Integer>> set = indexToBlockIDs
+							.entrySet();
+					for (Entry<Integer, Integer> entry : set) {
+						section.set(entry.getKey(), entry.getValue());
 					}
+					for (Entry<Integer, Integer> entry : set) {
+						if (section.get(entry.getKey()).intValue() != entry
+								.getValue()) {
+							ErrorHandler.logError(entry.getKey()
+									+ " not converted to " + entry.getValue());
+						}
+					}
+
 				}
 			}
 		}

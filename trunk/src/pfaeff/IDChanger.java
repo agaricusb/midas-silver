@@ -697,6 +697,6 @@ public class IDChanger extends JFrame implements ActionListener {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 		}
-		IDChanger frame = new IDChanger("mIDas *GOLD* V0.2.0 ");
+		IDChanger frame = new IDChanger("mIDas *GOLD* V2.1 ");
 	}
 }
