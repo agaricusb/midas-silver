@@ -79,14 +79,14 @@ public class IDChanger extends JFrame implements ActionListener {
 	public int changedPlayer = 0;
 
 	// Gui Elements
-	private JComboBox<File> cb_selectSaveGame;
+	private JComboBox cb_selectSaveGame;
 	private JComboBox cb_selectSourceID;
 	private JComboBox cb_selectTargetID;
 
 	private JCheckBox c_backup;
 
-	DefaultListModel<TranslationRecord> model = new DefaultListModel<TranslationRecord>();
-	public JList<TranslationRecord> li_ID;
+	DefaultListModel model = new DefaultListModel();
+	public JList li_ID;
 
 	public JLabel lb_file;
 	public JLabel lb_chunk;
@@ -256,8 +256,8 @@ public class IDChanger extends JFrame implements ActionListener {
 		return pn_ID;
 	}
 
-	private JList<TranslationRecord> initIDTextArea() {
-		li_ID = new JList<TranslationRecord>(model);
+	private JList initIDTextArea() {
+		li_ID = new JList(model);
 		return li_ID;
 	}
 
