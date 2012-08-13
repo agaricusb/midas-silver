@@ -453,7 +453,6 @@ public class IDChanger extends JFrame implements ActionListener {
 				fc.setSelectedFile(new File((new File(path)).getParent(),
 						"Patch.txt"));
 			} catch (URISyntaxException e1) {
-				// TODO Auto-generated catch block
 				ErrorHandler.logError(e1);
 			}
 
@@ -562,6 +561,9 @@ public class IDChanger extends JFrame implements ActionListener {
 			FileWriter fstream = null;
 			try {
 				if ((saveGames == null) || (saveGames.size() == 0)) {
+					JOptionPane.showMessageDialog(this,
+							"No save game has been chosen!", "Warning",
+							JOptionPane.WARNING_MESSAGE);
 					return;
 				}
 
@@ -593,28 +595,6 @@ public class IDChanger extends JFrame implements ActionListener {
 
 				}
 
-				// old version- reading from the target dropdown, now reads
-				// individual translations from string.
-				/*
-				 * // Source IDs final Set<Integer> sourceIDs = new
-				 * HashSet<Integer>(); for (int i = 0; i < model.size(); i++) {
-				 * String current = (String) model.get(i);
-				 * 
-				 * if (current == null) { return; }
-				 * 
-				 * if (current.contains(" ")) { current = current.substring(0,
-				 * current.indexOf(" ")); }
-				 * sourceIDs.add(Integer.parseInt(current)); }
-				 * 
-				 * // Target ID String current = (String)
-				 * cb_selectTargetID.getSelectedItem();
-				 * 
-				 * if (current == null) { return; }
-				 * 
-				 * if (current.contains(" ")) { current = current.substring(0,
-				 * current.indexOf(" ")); } final short targetID =
-				 * (short)Integer.parseInt(current);
-				 */
 				final IDChanger UI = this;
 				// change block ids
 				SwingWorker worker = new SwingWorker() {
@@ -628,6 +608,9 @@ public class IDChanger extends JFrame implements ActionListener {
 				worker.execute();
 			} catch (IOException e1) {
 				ErrorHandler.logError(e1);
+				JOptionPane.showMessageDialog(this,
+						"An error has occured and a log has been created.", "Error",
+						JOptionPane.WARNING_MESSAGE);
 			} finally {
 				if (log != null) {
 					try {
@@ -647,6 +630,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				}
 			}
 		}
+		return;
 	}
 
 
@@ -657,7 +641,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				JOptionPane
 				.showMessageDialog(
 						this,
-						"That Source ID is already being translated!",
+						"Source ID "+tr.source+" is already being translated!",
 						"Information",
 						JOptionPane.INFORMATION_MESSAGE);
 				return;
