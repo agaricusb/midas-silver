@@ -19,27 +19,39 @@ public class AnvilRegionFile extends RegionFileExtended {
 	}
 
 	@Override
-	protected void convertItems(IDChanger UI, Tag root,
-			HashMap<Integer, Integer> translations) {
-		HashMap<Integer, Integer> indexToBlockIDs;
+	public void convertItems(IDChanger UI, Tag root,
+			HashMap<BlockUID, BlockUID> translations) {
+		staticConvertItems(UI, root, translations);
+	}
+
+	public void staticConvertItems(IDChanger UI, Tag root,
+			HashMap<BlockUID, BlockUID> translations) {
+		HashMap<Integer, BlockUID> indexToBlockIDs;
 		ArrayList<Tag> items = new ArrayList<Tag>();
 		root.findAllChildrenByName(items, "Items", true);
 		for (Tag t2 : items) {
 			if (t2 instanceof ListTag) {
 				ArrayList<Tag> ids = new ArrayList<Tag>();
 				t2.findAllChildrenByName(ids, "id", true);
-				indexToBlockIDs = new HashMap<Integer, Integer>();
+				ArrayList<Tag> damageValues = new ArrayList<Tag>();
+				t2.findAllChildrenByName(damageValues, "Damage", true);
+				indexToBlockIDs = new HashMap<Integer, BlockUID>();
 				for (int i = 0; i < ids.size(); i++) {
 					Tag id = ids.get(i);
-					if (id instanceof ShortTag) {
+					Tag damageValue = damageValues.get(i);
+					if (id instanceof ShortTag
+							&& damageValue instanceof ShortTag) {
 						ShortTag idShort = (ShortTag) id;
-						if (translations.containsKey(Integer
-								.valueOf(idShort.data))) {
-							Integer toval = translations.get(Integer
-									.valueOf(idShort.data));
-							if (toval != null) {
+						ShortTag damageShort = (ShortTag) damageValue;
+						BlockUID blockUID = new BlockUID(
+								Integer.valueOf(idShort.data),
+								Integer.valueOf(damageShort.data));
+						if (translations.containsKey(blockUID)) {
+							BlockUID toBlockUID = translations.get(blockUID);
+							if (toBlockUID != null) {
 								UI.changedChest++;
-								indexToBlockIDs.put(Integer.valueOf(i), toval);
+								indexToBlockIDs.put(Integer.valueOf(i),
+										toBlockUID);
 							} else {
 								System.err.println("null target");
 								ErrorHandler
@@ -51,16 +63,24 @@ public class AnvilRegionFile extends RegionFileExtended {
 				// update nbt tree
 				Set<Integer> set = indexToBlockIDs.keySet();
 				for (Integer i : set) {
-					((ShortTag) ids.get(i)).data = indexToBlockIDs.get(i)
+					((ShortTag) ids.get(i)).data = indexToBlockIDs.get(i).blockID
 							.shortValue();
+					if (indexToBlockIDs.get(i).dataValue != null)
+						((ShortTag) damageValues.get(i)).data = indexToBlockIDs
+								.get(i).dataValue.shortValue();
 				}
 			}
 		}
 	}
 
 	@Override
-	protected void convertRegion(IDChanger UI, Tag root,
-			final HashMap<Integer, Integer> translations) {
+	public void convertRegion(IDChanger UI, Tag root,
+			final HashMap<BlockUID, BlockUID> translations) {
+		staticConvertRegion(UI, root, translations);
+	}
+
+	public static void staticConvertRegion(IDChanger UI, Tag root,
+			final HashMap<BlockUID, BlockUID> translations) {
 		ArrayList<Tag> result = new ArrayList<Tag>();
 		root.findAllChildrenByName(result, "Sections", true);
 		CompoundTag sectionTag;
@@ -71,26 +91,28 @@ public class AnvilRegionFile extends RegionFileExtended {
 					sectionTag = ((ListTag<CompoundTag>) list)
 							.get(sectionIndex);
 					Section section = new Section(sectionTag);
-					HashMap<Integer, Integer> indexToBlockIDs;
-					indexToBlockIDs = new HashMap<Integer, Integer>();
+					HashMap<Integer, BlockUID> indexToBlockIDs;
+					indexToBlockIDs = new HashMap<Integer, BlockUID>();
 					for (int i = 0; i < section.length(); i++) {
-						Integer bID = section.get(i);
-						if (translations.containsKey(bID)) {
-							UI.changedPlaced++;
+						BlockUID blockUID = section.getBlockUID(i);
+						if (translations.containsKey(blockUID)) {
+							if (UI != null) {
+								UI.changedPlaced++;
+							}
 							indexToBlockIDs.put(Integer.valueOf(i),
-									translations.get(bID));
+									translations.get(blockUID));
 						}
 					}
 
 					// write changes to nbt tree
-					Set<Map.Entry<Integer, Integer>> set = indexToBlockIDs
+					Set<Map.Entry<Integer, BlockUID>> set = indexToBlockIDs
 							.entrySet();
-					for (Entry<Integer, Integer> entry : set) {
-						section.set(entry.getKey(), entry.getValue());
+					for (Entry<Integer, BlockUID> entry : set) {
+						section.setBlockUID(entry.getKey(), entry.getValue());
 					}
-					for (Entry<Integer, Integer> entry : set) {
-						if (section.get(entry.getKey()).intValue() != entry
-								.getValue()) {
+					for (Entry<Integer, BlockUID> entry : set) {
+						if (!section.getBlockUID(entry.getKey()).equals(
+								entry.getValue())) {
 							ErrorHandler.logError(entry.getKey()
 									+ " not converted to " + entry.getValue());
 						}

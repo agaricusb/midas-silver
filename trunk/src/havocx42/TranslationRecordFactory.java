@@ -6,33 +6,56 @@ public class TranslationRecordFactory {
 			String targetString) {
 		if(sourceString.contains("->")||targetString.contains("->"))return null;
 		int sourceSpaceIndex;
-		Integer source;
+		Integer sourceBlockID=null;
+		Integer sourceDataValue;
 		String sourceName;
+		String[] parts;
+		boolean includesData =sourceString.contains(":"); 
+		if(includesData){
+			parts= sourceString.split(":");
+			sourceString=parts[1];
+			sourceBlockID=Integer.valueOf(parts[0]);
+		}
 		if (sourceString.contains(" ")) {
 			sourceSpaceIndex = sourceString.indexOf(' ');
-			source = Integer.valueOf(sourceString
-					.substring(0, sourceSpaceIndex));
-			sourceName = sourceString.substring(sourceSpaceIndex);
+			sourceName = sourceString.substring(sourceSpaceIndex).trim();
+			sourceString = sourceString.substring(0, sourceSpaceIndex);
 		} else {
-			source = Integer.valueOf(sourceString);
 			sourceName = "";
 		}
-
+		if(includesData){
+			sourceDataValue=Integer.valueOf(sourceString);
+		}else{
+			sourceBlockID=Integer.valueOf(sourceString);
+			sourceDataValue=null;
+		}
+		//target
 		int targetSpaceIndex;
-		Integer target;
+		Integer targetBlockID=null;
+		Integer targetDataValue;
 		String targetName;
+		includesData =targetString.contains(":"); 
+		if(includesData){
+			parts= targetString.split(":");
+			targetString=parts[1];
+			targetBlockID=Integer.valueOf(parts[0]);
+		}
 		if (targetString.contains(" ")) {
 			targetSpaceIndex = targetString.indexOf(' ');
-			target = Integer.valueOf(targetString
-					.substring(0, targetSpaceIndex));
-			targetName = targetString.substring(targetSpaceIndex);
+			targetName = targetString.substring(targetSpaceIndex).trim();
+			targetString = targetString.substring(0, targetSpaceIndex);
 		} else {
-			target = Integer.valueOf(targetString);
 			targetName = "";
 		}
+		if(includesData){
+			targetDataValue=Integer.valueOf(targetString);
+		}else{
+			targetBlockID=Integer.valueOf(targetString);
+			targetDataValue=null;
+		}
 
-		if (target != null && source != null) {
-			return new TranslationRecord(source, target, sourceName, targetName);
+		if (targetBlockID != null && sourceBlockID != null) {
+			return new TranslationRecord(sourceBlockID, sourceDataValue, targetBlockID,targetDataValue, sourceName, targetName);
 		} else {
 			return null;
 		}

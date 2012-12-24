@@ -72,7 +72,7 @@ public class NBTFileIO {
 		return result;
 	}
 
-	public static ArrayList<PlayerFile> getDatFiles(File baseFolder)
+	/*public static ArrayList<PlayerFile> getDatFiles(File baseFolder)
 			throws IOException {
 		// Switch to the "region" folder
 		File playersDir = new File(baseFolder, "players");
@@ -102,5 +102,5 @@ public class NBTFileIO {
 		}
 
 		return result;
-	}
+	}*/
 }

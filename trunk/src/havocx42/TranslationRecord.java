@@ -1,15 +1,15 @@
 package havocx42;
 
 public class TranslationRecord {
-	public Integer target;
-	public Integer source;
+	public BlockUID target;
+	public BlockUID source;
 	public String sourceName;
 	public String targetName;
-	public TranslationRecord(Integer source, Integer target, String sourceName,
+	public TranslationRecord(Integer sourceID, Integer sourceDataValue, Integer targetID, Integer targetDataValue, String sourceName,
 			String targetName) {
 		super();
-		this.target = target;
-		this.source = source;
+		this.target = new BlockUID(targetID,targetDataValue);
+		this.source = new BlockUID(sourceID,sourceDataValue);
 		this.sourceName = sourceName;
 		this.targetName = targetName;
 	}
@@ -19,8 +19,8 @@ public class TranslationRecord {
 	}
 
 	
-	public boolean equals(int i) {
-		return (source!=null&&i==source);
+	public boolean equals(BlockUID b) {
+		return (source!=null&&b.equals(source));
 	}
 	
 	

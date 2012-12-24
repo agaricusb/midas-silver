@@ -20,12 +20,12 @@ public abstract class RegionFileExtended extends region.RegionFile {
 		// TODO Auto-generated constructor stub
 	}
 	
-	protected abstract void convertRegion(IDChanger UI,Tag root,
-			final HashMap<Integer, Integer> translations);
+	public abstract void convertRegion(IDChanger UI,Tag root,
+			final HashMap<BlockUID, BlockUID> translations);
 	
-	protected abstract void convertItems(IDChanger UI,Tag root, HashMap<Integer, Integer> translations);
+	public abstract void convertItems(IDChanger UI,Tag root, HashMap<BlockUID, BlockUID> translations);
 
-	public void convert(IDChanger UI,HashMap<Integer, Integer> translations) throws IOException {
+	public void convert(IDChanger UI,HashMap<BlockUID, BlockUID> translations) throws IOException {
 
 		// Progress
 

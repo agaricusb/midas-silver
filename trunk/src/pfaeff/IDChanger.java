@@ -20,6 +20,7 @@
 
 package pfaeff;
 
+import havocx42.BlockUID;
 import havocx42.ErrorHandler;
 import havocx42.FileListCellRenderer;
 import havocx42.TranslationRecord;
@@ -580,7 +581,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				}
 				// new version use a hashmap to record what blocks to transmute
 				// to what.
-				final HashMap<Integer, Integer> translations = new HashMap<Integer, Integer>();
+				final HashMap<BlockUID, BlockUID> translations = new HashMap<BlockUID, BlockUID>();
 				// Create file
 				fstream = new FileWriter("lasttranslation.txt");
 				log = new BufferedWriter(fstream);
@@ -637,7 +638,7 @@ public class IDChanger extends JFrame implements ActionListener {
 
 	private void addTranslation(TranslationRecord tr) {
 		for(int i =0;i<model.size();i++){
-			if (((TranslationRecord)model.get(i)).source ==tr.source){
+			if (((TranslationRecord)model.get(i)).source.equals(tr.source)){
 				JOptionPane
 				.showMessageDialog(
 						this,
@@ -681,6 +682,6 @@ public class IDChanger extends JFrame implements ActionListener {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 		}
-		IDChanger frame = new IDChanger("mIDas *GOLD* V0.2.1 ");
+		IDChanger frame = new IDChanger("mIDas *GOLD* V0.2.2 ");
 	}
 }
