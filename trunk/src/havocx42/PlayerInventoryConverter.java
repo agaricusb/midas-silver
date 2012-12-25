@@ -5,9 +5,7 @@ import java.util.HashMap;
 
 import pfaeff.IDChanger;
 
-import com.mojang.nbt.CompoundTag;
-import com.mojang.nbt.ListTag;
-import com.mojang.nbt.Tag;
+import com.mojang.nbt.*;
 
 public class PlayerInventoryConverter {
 
@@ -21,22 +19,20 @@ public class PlayerInventoryConverter {
 					Tag itemTag = inventoryListTag.get(i);
 					if (itemTag instanceof CompoundTag) {
 						CompoundTag itemCompoundTag = (CompoundTag) itemTag;
-						short id = itemCompoundTag.getShort("id");
-						short damage = itemCompoundTag.getShort("Damage");
-						BlockUID blockUID = new BlockUID(Integer.valueOf(id),
-								Integer.valueOf(damage));
+						ShortTag idShortTag = (ShortTag) itemCompoundTag.findChildByName("id", false);
+						ShortTag damageShortTag = (ShortTag) itemCompoundTag.findChildByName("Damage", false);
+						BlockUID blockUID = new BlockUID(Integer.valueOf(idShortTag.data),
+								Integer.valueOf(damageShortTag.data));
 						if (translations.containsKey(blockUID)) {
 							BlockUID toval = translations.get(blockUID);
 							if (toval != null) {
 								UI.changedPlayer++;
-								itemCompoundTag.putShort("id",
-										toval.blockID.shortValue());
+								idShortTag.data=toval.blockID.shortValue();
 								if (toval.dataValue != null) {
-									itemCompoundTag.putShort("Damage",
-											toval.dataValue.shortValue());
+									damageShortTag.data=toval.dataValue.shortValue();
 								}
 							} else {
-								ErrorHandler.logError("null target for" + id);
+								ErrorHandler.logError("null target for" + toval.blockID);
 							}
 						}
 					}

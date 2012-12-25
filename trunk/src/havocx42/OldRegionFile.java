@@ -41,7 +41,7 @@ public class OldRegionFile extends RegionFileExtended {
 							ShortTag idShortTag = (ShortTag) idTag;
 							ShortTag damageShortTag = (ShortTag) damageTag;
 							BlockUID currentBlock = new BlockUID(Integer.valueOf(idShortTag.data),Integer.valueOf(damageShortTag.data));
-							if(translations.containsKey(currentBlock)){
+							if(translations.containsKey(currentBlock)&&translations.get(currentBlock).dataValue<16){
 								BlockUID targetBlock = translations.get(currentBlock);
 								if(UI!=null)UI.changedChest++;
 								idShortTag.data=targetBlock.blockID.shortValue();
