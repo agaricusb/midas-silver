@@ -50,7 +50,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
+
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -62,6 +62,8 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
+
+import com.sampullara.cli.Argument;
 
 import region.RegionFile;
 
@@ -83,8 +85,6 @@ public class IDChanger extends JFrame implements ActionListener {
 	private JComboBox cb_selectSaveGame;
 	private JComboBox cb_selectSourceID;
 	private JComboBox cb_selectTargetID;
-
-	private JCheckBox c_backup;
 
 	DefaultListModel model = new DefaultListModel();
 	public JList li_ID;
@@ -163,11 +163,6 @@ public class IDChanger extends JFrame implements ActionListener {
 		pnl_start.add(createStartButton());
 		// pnl_start.add(createBackupCheckBox());
 		return pnl_start;
-	}
-
-	private JCheckBox createBackupCheckBox() {
-		c_backup = new JCheckBox("Make a backup", false);
-		return c_backup;
 	}
 
 	private JProgressBar createFileProgressBar() {
@@ -656,32 +651,14 @@ public class IDChanger extends JFrame implements ActionListener {
 		return;
 	}
 
-	private void backUpSaveGame(File file) {
-		File regionDir = new File(file, "region");
-		if (!regionDir.exists()) {
-			return;
-		}
-		int num = 1;
-		File backUpDir = new File(file, "region_backup");
-		while (backUpDir.exists()) {
-			backUpDir = new File(file, "region_backup_" + num);
-			num++;
-		}
-		try {
-			FileTools.copyDirectory(regionDir, backUpDir);
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(this, "Could not create backup!",
-					"Error", JOptionPane.ERROR_MESSAGE);
-			ErrorHandler.logError(e);
-		}
-	}
-
 	public static void main(String[] args) {
+		
 		try {
 			// Use system specific look and feel
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 		}
 		IDChanger frame = new IDChanger("mIDas *GOLD* V0.2.2 ");
+
 	}
 }

@@ -57,8 +57,8 @@ public class World {
 				CompoundTag root = NbtIo.read(dis);
 				PlayerInventoryConverter.convertPlayerInventory(UI, root, translations);
 				dis.close();
-				DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(playerFile))));
-				NbtIo.write(root, dos);
+				DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(playerFile)));
+				NbtIo.writeCompressed(root, dos);
 			} catch (Exception e) {
 				ErrorHandler.logError(e);
 			}

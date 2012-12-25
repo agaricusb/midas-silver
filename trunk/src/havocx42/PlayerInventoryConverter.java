@@ -45,5 +45,4 @@ public class PlayerInventoryConverter {
 		}
 		return root;
 	}
-
 }

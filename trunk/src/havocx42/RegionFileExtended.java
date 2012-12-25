@@ -43,13 +43,17 @@ public abstract class RegionFileExtended extends region.RegionFile {
 		}
 
 		// PROGESSBAR CHUNK
-		UI.pb_chunk.setMaximum(chunks.size() - 1);
+		if(UI!=null){
+			UI.pb_chunk.setMaximum(chunks.size() - 1);
+		}
 		int count_chunk = 0;
 
 		for (Point p : chunks) {
 			// Progress
-			UI.pb_chunk.setValue(count_chunk++);
-			UI.lb_chunk.setText("Current Chunk: (" + p.x + "; " + p.y+ ")");
+			if(UI!=null){
+				UI.pb_chunk.setValue(count_chunk++);
+				UI.lb_chunk.setText("Current Chunk: (" + p.x + "; " + p.y+ ")");
+			}
 			// Read chunks
 
 			DataInputStream input = getChunkDataInputStream(p.x, p.y);
