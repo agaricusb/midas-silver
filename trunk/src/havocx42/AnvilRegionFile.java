@@ -23,7 +23,7 @@ public class AnvilRegionFile extends RegionFileExtended {
 		staticConvertItems(UI, root, translations);
 	}
 
-	public void staticConvertItems(IDChanger UI, Tag root, HashMap<BlockUID, BlockUID> translations) {
+	public static void staticConvertItems(IDChanger UI, Tag root, HashMap<BlockUID, BlockUID> translations) {
 		HashMap<Integer, BlockUID> indexToBlockIDs;
 		ArrayList<Tag> itemsTags = new ArrayList<Tag>();
 		root.findAllChildrenByName(itemsTags, "Items", true);
@@ -53,32 +53,6 @@ public class AnvilRegionFile extends RegionFileExtended {
 						}
 					}
 				}
-				/*
-				 * ArrayList<Tag> ids = new ArrayList<Tag>();
-				 * item.findAllChildrenByName(ids, "id", true); ArrayList<Tag>
-				 * damageValues = new ArrayList<Tag>();
-				 * item.findAllChildrenByName(damageValues, "Damage", true);
-				 * indexToBlockIDs = new HashMap<Integer, BlockUID>(); for (int
-				 * i = 0; i < ids.size(); i++) { Tag id = ids.get(i); Tag
-				 * damageValue = damageValues.get(i); if (id instanceof ShortTag
-				 * && damageValue instanceof ShortTag) { ShortTag idShort =
-				 * (ShortTag) id; ShortTag damageShort = (ShortTag) damageValue;
-				 * BlockUID blockUID = new BlockUID(
-				 * Integer.valueOf(idShort.data),
-				 * Integer.valueOf(damageShort.data)); if
-				 * (translations.containsKey(blockUID)) { BlockUID toBlockUID =
-				 * translations.get(blockUID); if (toBlockUID != null) {
-				 * if(UI!=null)UI.changedChest++;
-				 * indexToBlockIDs.put(Integer.valueOf(i), toBlockUID); } else {
-				 * System.err.println("null target"); ErrorHandler
-				 * .logError("null Target while converting items"); } } } } //
-				 * update nbt tree Set<Integer> set = indexToBlockIDs.keySet();
-				 * for (Integer i : set) { ((ShortTag) ids.get(i)).data =
-				 * indexToBlockIDs.get(i).blockID .shortValue(); if
-				 * (indexToBlockIDs.get(i).dataValue != null) ((ShortTag)
-				 * damageValues.get(i)).data = indexToBlockIDs
-				 * .get(i).dataValue.shortValue();
-				 */
 			}
 		}
 	}
