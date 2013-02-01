@@ -123,8 +123,8 @@ public class IDChanger extends JFrame implements ActionListener {
 
 	private void initIDNames() {
 		try {
-			String path = IDChanger.class.getProtectionDomain().getCodeSource()
-					.getLocation().toURI().getPath();
+			String path = IDChanger.class.getProtectionDomain().getCodeSource().getLocation()
+					.toURI().getPath();
 			File f = new File((new File(path)).getParent(), "IDNames.txt");
 			if (f.exists()) {
 				try {
@@ -140,8 +140,7 @@ public class IDChanger extends JFrame implements ActionListener {
 
 	private JPanel createProgressPanel() {
 		JPanel pnl_progress = new JPanel();
-		pnl_progress
-				.setLayout(new BoxLayout(pnl_progress, BoxLayout.PAGE_AXIS));
+		pnl_progress.setLayout(new BoxLayout(pnl_progress, BoxLayout.PAGE_AXIS));
 		pnl_progress.setBorder(BorderFactory.createTitledBorder("Progress"));
 		pnl_progress.add(createStartPanel());
 		pnl_progress.add(Box.createVerticalStrut(10));
@@ -152,8 +151,7 @@ public class IDChanger extends JFrame implements ActionListener {
 		pnl_progress.add(lb_chunk);
 		pnl_progress.add(createChunkProgressBar());
 
-		pnl_progress.setPreferredSize(new Dimension(400, pnl_progress
-				.getHeight()));
+		pnl_progress.setPreferredSize(new Dimension(400, pnl_progress.getHeight()));
 
 		return pnl_progress;
 	}
@@ -183,8 +181,7 @@ public class IDChanger extends JFrame implements ActionListener {
 	private JPanel createChooseIDsPanel() {
 		JPanel pnl_chooseIDs = new JPanel();
 		pnl_chooseIDs.setBorder(BorderFactory.createTitledBorder("Change IDs"));
-		pnl_chooseIDs.setLayout(new BoxLayout(pnl_chooseIDs,
-				BoxLayout.PAGE_AXIS));
+		pnl_chooseIDs.setLayout(new BoxLayout(pnl_chooseIDs, BoxLayout.PAGE_AXIS));
 		pnl_chooseIDs.add(new JLabel("Translations: "));
 		pnl_chooseIDs.add(initIDPane());
 		pnl_chooseIDs.add(initSourceIDPanel());
@@ -227,8 +224,7 @@ public class IDChanger extends JFrame implements ActionListener {
 	// new version
 	private JPanel createOpenFilesPanel() {
 		JPanel pnl_openFiles = new JPanel(new FlowLayout());
-		pnl_openFiles.setBorder(BorderFactory
-				.createTitledBorder("Select files"));
+		pnl_openFiles.setBorder(BorderFactory.createTitledBorder("Select files"));
 		pnl_openFiles.add(new JLabel("Load patch file:"));
 		pnl_openFiles.add(createOpenPatchFileButton());
 		pnl_openFiles.add(new JLabel("Available savegames:"));
@@ -270,8 +266,7 @@ public class IDChanger extends JFrame implements ActionListener {
 		cb_selectSourceID.setEditable(true);
 		cb_selectSourceID.setRenderer(renderer);
 
-		cb_selectSourceID.addActionListener(new NumberOnlyActionListener(
-				idNames, 0, 32000 - 1));
+		cb_selectSourceID.addActionListener(new NumberOnlyActionListener(idNames, 0, 32000 - 1));
 		return cb_selectSourceID;
 	}
 
@@ -288,8 +283,7 @@ public class IDChanger extends JFrame implements ActionListener {
 		cb_selectTargetID.setEditable(true);
 		cb_selectTargetID.setRenderer(renderer);
 
-		cb_selectTargetID.addActionListener(new NumberOnlyActionListener(
-				idNames, 0, 32000 - 1));
+		cb_selectTargetID.addActionListener(new NumberOnlyActionListener(idNames, 0, 32000 - 1));
 		return cb_selectTargetID;
 	}
 
@@ -334,16 +328,16 @@ public class IDChanger extends JFrame implements ActionListener {
 			family = operatingSystem.getFamily();
 		}
 		switch (family) {
-		case WINDOWS:
-			return new File(System.getenv("appdata"), "." + s);
-		case LINUX:
-			return new File(System.getProperty("user.home", "."), s);
-		case MAC: {
-			return new File(System.getProperty("user.home", "."),
-					"Library/Application Support/" + s);
-		}
-		default:
-			return new File(System.getProperty("user.home", "."), s);
+			case WINDOWS :
+				return new File(System.getenv("appdata"), "." + s);
+			case LINUX :
+				return new File(System.getProperty("user.home", "."), s);
+			case MAC : {
+				return new File(System.getProperty("user.home", "."),
+						"Library/Application Support/" + s);
+			}
+			default :
+				return new File(System.getProperty("user.home", "."), s);
 		}
 	}
 
@@ -368,22 +362,16 @@ public class IDChanger extends JFrame implements ActionListener {
 			 * if (!line.equals("")) { line = " " + line; } line = index + line;
 			 */
 			try {
-				if (line.contains(" ")) {
-					Integer.parseInt(line.substring(0, line.indexOf(" ")));
-					result.add(line);
-				}
+				if (line.matches("[0-9]+(:?[0-9]+)? [0-9a-zA-Z.]+")) result.add(line);
+
 			} catch (NumberFormatException e) {
-				JOptionPane
-						.showMessageDialog(
-								this,
-								"That's not how you format IDNames \"" + line
-										+ System.getProperty("line.separator")
-										+ "example:"
-										+ System.getProperty("line.separator")
-										+ "1 stone", "Error",
-								JOptionPane.ERROR_MESSAGE);
-				ErrorHandler
-						.logError("User tried to input IDNames, no big deal");
+				JOptionPane.showMessageDialog(
+						this,
+						"That's not how you format IDNames \"" + line
+								+ System.getProperty("line.separator") + "example:"
+								+ System.getProperty("line.separator") + "1 stone", "Error",
+						JOptionPane.ERROR_MESSAGE);
+				ErrorHandler.logError("User tried to input IDNames, no big deal");
 			}
 			line = br.readLine();
 		}
@@ -410,8 +398,7 @@ public class IDChanger extends JFrame implements ActionListener {
 						saveGames.add(f);
 
 						cb_selectSaveGame.addItem(f);
-						cb_selectSaveGame.setSelectedIndex(cb_selectSaveGame
-								.getItemCount() - 1);
+						cb_selectSaveGame.setSelectedIndex(cb_selectSaveGame.getItemCount() - 1);
 
 						// workaround for a bug that occurs when there was no
 						// item in the beginning
@@ -423,18 +410,14 @@ public class IDChanger extends JFrame implements ActionListener {
 						// System.out.println(cb_selectSaveGame.getItemCount());
 
 					} else {
-						cb_selectSaveGame
-								.setSelectedIndex(saveGames.indexOf(f));
-						JOptionPane
-								.showMessageDialog(
-										this,
-										"The selected savegame is already in the list!",
-										"Information",
-										JOptionPane.INFORMATION_MESSAGE);
+						cb_selectSaveGame.setSelectedIndex(saveGames.indexOf(f));
+						JOptionPane.showMessageDialog(this,
+								"The selected savegame is already in the list!", "Information",
+								JOptionPane.INFORMATION_MESSAGE);
 					}
 				} else {
-					JOptionPane.showMessageDialog(this, "Invalid savegame!",
-							"Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, "Invalid savegame!", "Error",
+							JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		}
@@ -444,10 +427,9 @@ public class IDChanger extends JFrame implements ActionListener {
 			final JFileChooser fc = new JFileChooser();
 			String path;
 			try {
-				path = IDChanger.class.getProtectionDomain().getCodeSource()
-						.getLocation().toURI().getPath();
-				fc.setSelectedFile(new File((new File(path)).getParent(),
-						"Patch.txt"));
+				path = IDChanger.class.getProtectionDomain().getCodeSource().getLocation().toURI()
+						.getPath();
+				fc.setSelectedFile(new File((new File(path)).getParent(), "Patch.txt"));
 			} catch (URISyntaxException e1) {
 				ErrorHandler.logError(e1);
 			}
@@ -459,8 +441,7 @@ public class IDChanger extends JFrame implements ActionListener {
 					try {
 						FileInputStream fstream = new FileInputStream(f);
 						DataInputStream in = new DataInputStream(fstream);
-						BufferedReader br = new BufferedReader(
-								new InputStreamReader(in));
+						BufferedReader br = new BufferedReader(new InputStreamReader(in));
 						String strLine;
 						TranslationRecord tr;
 						while ((strLine = br.readLine()) != null) {
@@ -478,9 +459,8 @@ public class IDChanger extends JFrame implements ActionListener {
 								// JOptionPane.showMessageDialog(this,
 								// "That's not how you format translations \""+strLine+System.getProperty("line.separator")+"example:"+System.getProperty("line.separator")+"1 stone -> 3 dirt",
 								// "Error", JOptionPane.ERROR_MESSAGE);
-								ErrorHandler
-										.logError("Patch contains an invalid line, no big deal"
-												+ strLine);
+								ErrorHandler.logError("Patch contains an invalid line, no big deal"
+										+ strLine);
 								continue;
 							}
 
@@ -501,25 +481,20 @@ public class IDChanger extends JFrame implements ActionListener {
 		// new version adds user stupidity resistance II
 		if ("addID".equals(e.getActionCommand())) {
 			try {
-				String currentSource = (String) cb_selectSourceID
-						.getSelectedItem();
-				String currentTarget = (String) cb_selectTargetID
-						.getSelectedItem();
+				String currentSource = (String) cb_selectSourceID.getSelectedItem();
+				String currentTarget = (String) cb_selectTargetID.getSelectedItem();
 
-				TranslationRecord tr = TranslationRecordFactory.createTranslationRecord(currentSource,
-						currentTarget);
+				TranslationRecord tr = TranslationRecordFactory.createTranslationRecord(
+						currentSource, currentTarget);
 				if (tr != null) {
 					addTranslation(tr);
 				} else {
 					JOptionPane.showMessageDialog(
 							this,
 							"That's not how you format translations"
-									+ System.getProperty("line.separator")
-									+ "example:"
-									+ System.getProperty("line.separator")
-									+ "1 stone"
-									+ System.getProperty("line.separator")+
-									"3 dirt", "Error",
+									+ System.getProperty("line.separator") + "example:"
+									+ System.getProperty("line.separator") + "1 stone"
+									+ System.getProperty("line.separator") + "3 dirt", "Error",
 							JOptionPane.ERROR_MESSAGE);
 				}
 				// new version uses adds -> targetid to string
@@ -531,11 +506,9 @@ public class IDChanger extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(
 						this,
 						"That's not how you format translations"
-								+ System.getProperty("line.separator")
-								+ "example:"
-								+ System.getProperty("line.separator")
-								+ "1 stone -> 3 dirt", "Error",
-						JOptionPane.ERROR_MESSAGE);
+								+ System.getProperty("line.separator") + "example:"
+								+ System.getProperty("line.separator") + "1 stone -> 3 dirt",
+						"Error", JOptionPane.ERROR_MESSAGE);
 				// ErrorHandler.logError(badinput);
 			}
 		}
@@ -557,8 +530,7 @@ public class IDChanger extends JFrame implements ActionListener {
 			FileWriter fstream = null;
 			try {
 				if ((saveGames == null) || (saveGames.size() == 0)) {
-					JOptionPane.showMessageDialog(this,
-							"No save game has been chosen!", "Warning",
+					JOptionPane.showMessageDialog(this, "No save game has been chosen!", "Warning",
 							JOptionPane.WARNING_MESSAGE);
 					return;
 				}
@@ -569,8 +541,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				final World world = new World(saveGames.get(saveIndex));
 
 				if (model.size() == 0) {
-					JOptionPane.showMessageDialog(this,
-							"No IDs have been chosen!", "Warning",
+					JOptionPane.showMessageDialog(this, "No IDs have been chosen!", "Warning",
 							JOptionPane.WARNING_MESSAGE);
 					return;
 				}
@@ -582,7 +553,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				log = new BufferedWriter(fstream);
 
 				for (int i = 0; i < model.size(); i++) {
-					TranslationRecord tr=(TranslationRecord)model.get(i);
+					TranslationRecord tr = (TranslationRecord) model.get(i);
 					log.write(tr.toString());
 					log.newLine();
 					if (tr.source != null && tr.target != null) {
@@ -596,17 +567,22 @@ public class IDChanger extends JFrame implements ActionListener {
 				SwingWorker worker = new SwingWorker() {
 					@Override
 					protected Object doInBackground() throws Exception {
-						world.convert(UI,translations);
+						world.convert(UI, translations);
 						return null;
 					}
 				};
 				// worker.addPropertyChangeListener(this);
 				worker.execute();
 			} catch (IOException e1) {
-				ErrorHandler.logError(e1);
-				JOptionPane.showMessageDialog(this,
-						"An error has occured and a log has been created.", "Error",
-						JOptionPane.WARNING_MESSAGE);
+				if (ErrorHandler.logError(e1)) {
+					JOptionPane.showMessageDialog(this,
+							"An error has occured and a log has been created.", "Error",
+							JOptionPane.WARNING_MESSAGE);
+				}else{
+					JOptionPane.showMessageDialog(this,
+							"An error has occured and another error occured while trying to create a log\n The original error message:"+e1.getMessage() , "Error",
+							JOptionPane.WARNING_MESSAGE);
+				}
 			} finally {
 				if (log != null) {
 					try {
@@ -629,16 +605,11 @@ public class IDChanger extends JFrame implements ActionListener {
 		return;
 	}
 
-
-
 	private void addTranslation(TranslationRecord tr) {
-		for(int i =0;i<model.size();i++){
-			if (((TranslationRecord)model.get(i)).source.equals(tr.source)){
-				JOptionPane
-				.showMessageDialog(
-						this,
-						"Source ID "+tr.source+" is already being translated!",
-						"Information",
+		for (int i = 0; i < model.size(); i++) {
+			if (((TranslationRecord) model.get(i)).source.equals(tr.source)) {
+				JOptionPane.showMessageDialog(this, "Source ID " + tr.source
+						+ " is already being translated!", "Information",
 						JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
@@ -652,11 +623,12 @@ public class IDChanger extends JFrame implements ActionListener {
 	}
 
 	public static void main(String[] args) {
-		
+
 		try {
-			// Use system specific look and feel
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			//Use system specific look and feel
+			//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
+			
 		}
 		IDChanger frame = new IDChanger("mIDas *GOLD* V0.2.2 ");
 

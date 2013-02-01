@@ -80,7 +80,7 @@ public class AnvilRegionFile extends RegionFileExtended {
 							if (UI != null) {
 								UI.changedPlaced++;
 							}
-							if (translations.get(blockUID).dataValue < 16) {
+							if (translations.get(blockUID).dataValue==null||translations.get(blockUID).dataValue < 16) {
 
 								indexToBlockIDs.put(Integer.valueOf(i), translations.get(blockUID));
 							}
