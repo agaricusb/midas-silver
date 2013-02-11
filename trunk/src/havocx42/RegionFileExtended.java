@@ -13,22 +13,16 @@ import com.mojang.nbt.Tag;
 
 import pfaeff.IDChanger;
 
-public abstract class RegionFileExtended extends region.RegionFile {
+public class RegionFileExtended extends region.RegionFile {
 
 	public RegionFileExtended(File path) {
 		super(path);
-		// TODO Auto-generated constructor stub
 	}
-	
-	public abstract void convertRegion(IDChanger UI,Tag root,
-			final HashMap<BlockUID, BlockUID> translations);
-	
-	public abstract void convertItems(IDChanger UI,Tag root, HashMap<BlockUID, BlockUID> translations);
 
-	public void convert(IDChanger UI,HashMap<BlockUID, BlockUID> translations) throws IOException {
+	public void convert(Status status, HashMap<BlockUID, BlockUID> translations, ArrayList<ConverterPlugin> regionPlugins)
+			throws IOException {
 
 		// Progress
-
 
 		// System.out.println("Processing file " + rf.getFile());
 		ArrayList<Point> chunks = new ArrayList<Point>();
@@ -43,25 +37,27 @@ public abstract class RegionFileExtended extends region.RegionFile {
 		}
 
 		// PROGESSBAR CHUNK
-		if(UI!=null){
-			UI.pb_chunk.setMaximum(chunks.size() - 1);
-		}
+		status.pb_chunk.setMaximum(chunks.size() - 1);
+
 		int count_chunk = 0;
 
 		for (Point p : chunks) {
 			// Progress
-			if(UI!=null){
-				UI.pb_chunk.setValue(count_chunk++);
-				UI.lb_chunk.setText("Current Chunk: (" + p.x + "; " + p.y+ ")");
-			}
+			status.pb_chunk.setValue(count_chunk++);
+			status.lb_chunk.setText("Current Chunk: (" + p.x + "; " + p.y + ")");
+
 			// Read chunks
 
 			DataInputStream input = getChunkDataInputStream(p.x, p.y);
 			CompoundTag root = NbtIo.read(input);
 			// Find blocks
-			convertRegion(UI,root, translations);
+			// convertRegion(UI,root, translations);
 			// find blocks and items in chest etc. inventory
-			convertItems(UI,root, translations);
+			// convertItems(UI,root, translations);
+			for (ConverterPlugin plugin : regionPlugins) {
+				plugin.convert(status, root, translations);
+			}
+
 			input.close();
 
 			// Write chunks
@@ -70,5 +66,4 @@ public abstract class RegionFileExtended extends region.RegionFile {
 			output.close();
 		}
 	}
-
 }

@@ -5,6 +5,11 @@ public class BlockUID {
 	public Integer blockID;
 	public Integer dataValue;
 	
+	/**
+	 * Creates a new BlockUID
+	 * @param blockID The Block ID
+	 * @param dataValue The data value, also known as the damage value
+	 */
 	public BlockUID(Integer blockID,Integer dataValue){
 		this.blockID=blockID;
 		this.dataValue=dataValue;

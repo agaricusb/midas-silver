@@ -21,12 +21,15 @@
 package pfaeff;
 
 import havocx42.BlockUID;
-import havocx42.ErrorHandler;
+import havocx42.ConverterPlugin;
 import havocx42.FileListCellRenderer;
+import havocx42.PluginLoader;
+import havocx42.Status;
 import havocx42.TranslationRecord;
 import havocx42.TranslationRecordFactory;
 import havocx42.World;
-
+import havocx42.logging.PopupHandler;
+import havocx42.ErrorHandler;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -37,13 +40,19 @@ import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.HashMap;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.MemoryHandler;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -63,8 +72,6 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 
-import com.sampullara.cli.Argument;
-
 import region.RegionFile;
 
 /*
@@ -74,32 +81,29 @@ public class IDChanger extends JFrame implements ActionListener {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 9149749206914440913L;
-	private ArrayList<File> saveGames = new ArrayList<File>();
-	private ArrayList<String> idNames = new ArrayList<String>();
-	public int changedPlaced = 0;
-	public int changedChest = 0;
-	public int changedPlayer = 0;
+	private static final long	serialVersionUID	= 9149749206914440913L;
+	private ArrayList<File>		saveGames			= new ArrayList<File>();
+	private ArrayList<String>	idNames				= new ArrayList<String>();
+	public Status				status				= new Status();
 
 	// Gui Elements
-	private JComboBox cb_selectSaveGame;
-	private JComboBox cb_selectSourceID;
-	private JComboBox cb_selectTargetID;
+	private JComboBox			cb_selectSaveGame;
+	private JComboBox			cb_selectSourceID;
+	private JComboBox			cb_selectTargetID;
 
-	DefaultListModel model = new DefaultListModel();
-	public JList li_ID;
+	DefaultListModel			model				= new DefaultListModel();
+	public JList				li_ID;
 
-	public JLabel lb_file;
-	public JLabel lb_chunk;
-	public JProgressBar pb_file;
-	public JProgressBar pb_chunk;
+	private static Logger		logger				= Logger.getLogger(IDChanger.class.getName());
 
-	public IDChanger(String title) {
+	public IDChanger(String title) throws SecurityException, IOException {
 		super(title);
 
 		// Init Data
+
 		initSaveGames();
 		initIDNames();
+		initLogger();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -114,6 +118,23 @@ public class IDChanger extends JFrame implements ActionListener {
 		setVisible(true);
 	}
 
+	private void initLogger() {
+		Logger rootLogger = Logger.getLogger("");
+		PopupHandler popupHandler = new PopupHandler(this);
+		rootLogger.addHandler(popupHandler);
+	}
+
+	private static void initRootLogger() throws SecurityException, IOException {
+		FileHandler fileHandler;
+		fileHandler = new FileHandler("midasLog.%u.%g.txt", 1024 * 1024, 3, true);
+		fileHandler.setLevel(Level.ALL);
+		MemoryHandler memoryHandler = new MemoryHandler(fileHandler, 300, Level.SEVERE);
+		memoryHandler.setLevel(Level.ALL);
+		Logger rootLogger = Logger.getLogger("");
+		rootLogger.setLevel(Level.ALL);
+		rootLogger.addHandler(memoryHandler);
+	}
+
 	private void initSaveGames() {
 		File mcSavePath = getMCSavePath();
 		if (mcSavePath.exists()) {
@@ -123,18 +144,15 @@ public class IDChanger extends JFrame implements ActionListener {
 
 	private void initIDNames() {
 		try {
-			String path = IDChanger.class.getProtectionDomain().getCodeSource().getLocation()
-					.toURI().getPath();
+			String path = IDChanger.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
 			File f = new File((new File(path)).getParent(), "IDNames.txt");
 			if (f.exists()) {
-				try {
 					idNames = readFile(f);
-				} catch (IOException e) {
-					ErrorHandler.logError(e);
-				}
+			}else{
+				logger.info("IDNames.txt does not exist");
 			}
-		} catch (URISyntaxException e1) {
-			ErrorHandler.logError(e1);
+		} catch (IOException|URISyntaxException e1) {
+			logger.log(Level.WARNING,"Unable to load IDNames.txt",e1);
 		}
 	}
 
@@ -144,11 +162,11 @@ public class IDChanger extends JFrame implements ActionListener {
 		pnl_progress.setBorder(BorderFactory.createTitledBorder("Progress"));
 		pnl_progress.add(createStartPanel());
 		pnl_progress.add(Box.createVerticalStrut(10));
-		lb_file = new JLabel("Current File:");
-		pnl_progress.add(lb_file);
+		status.lb_file = new JLabel("Current File:");
+		pnl_progress.add(status.lb_file);
 		pnl_progress.add(createFileProgressBar());
-		lb_chunk = new JLabel("Current Chunk:");
-		pnl_progress.add(lb_chunk);
+		status.lb_chunk = new JLabel("Current Chunk:");
+		pnl_progress.add(status.lb_chunk);
 		pnl_progress.add(createChunkProgressBar());
 
 		pnl_progress.setPreferredSize(new Dimension(400, pnl_progress.getHeight()));
@@ -164,17 +182,17 @@ public class IDChanger extends JFrame implements ActionListener {
 	}
 
 	private JProgressBar createFileProgressBar() {
-		pb_file = new JProgressBar(0, 100);
-		pb_file.setValue(0);
-		pb_file.setStringPainted(true);
-		return pb_file;
+		status.pb_file = new JProgressBar(0, 100);
+		status.pb_file.setValue(0);
+		status.pb_file.setStringPainted(true);
+		return status.pb_file;
 	}
 
 	private JProgressBar createChunkProgressBar() {
-		pb_chunk = new JProgressBar(0, 100);
-		pb_chunk.setValue(0);
-		pb_chunk.setStringPainted(true);
-		return pb_chunk;
+		status.pb_chunk = new JProgressBar(0, 100);
+		status.pb_chunk.setValue(0);
+		status.pb_chunk.setStringPainted(true);
+		return status.pb_chunk;
 	}
 
 	// new version changed From to Translations
@@ -328,16 +346,15 @@ public class IDChanger extends JFrame implements ActionListener {
 			family = operatingSystem.getFamily();
 		}
 		switch (family) {
-			case WINDOWS :
-				return new File(System.getenv("appdata"), "." + s);
-			case LINUX :
-				return new File(System.getProperty("user.home", "."), s);
-			case MAC : {
-				return new File(System.getProperty("user.home", "."),
-						"Library/Application Support/" + s);
-			}
-			default :
-				return new File(System.getProperty("user.home", "."), s);
+		case WINDOWS:
+			return new File(System.getenv("appdata"), "." + s);
+		case LINUX:
+			return new File(System.getProperty("user.home", "."), s);
+		case MAC: {
+			return new File(System.getProperty("user.home", "."), "Library/Application Support/" + s);
+		}
+		default:
+			return new File(System.getProperty("user.home", "."), s);
 		}
 	}
 
@@ -346,7 +363,7 @@ public class IDChanger extends JFrame implements ActionListener {
 		try {
 			rf = NBTFileIO.getRegionFiles(f);
 		} catch (IOException e) {
-			ErrorHandler.logError(e);
+			logger.log(Level.WARNING, "Unable to load save file",e);
 			return false;
 		}
 		return ((rf != null) && (rf.size() > 0));
@@ -362,16 +379,13 @@ public class IDChanger extends JFrame implements ActionListener {
 			 * if (!line.equals("")) { line = " " + line; } line = index + line;
 			 */
 			try {
-				if (line.matches("[0-9]+(:?[0-9]+)? [0-9a-zA-Z.]+")) result.add(line);
+				if (line.matches("[0-9]+(:?[0-9]+)? [0-9a-zA-Z.]+"))
+					result.add(line);
 
 			} catch (NumberFormatException e) {
-				JOptionPane.showMessageDialog(
-						this,
-						"That's not how you format IDNames \"" + line
-								+ System.getProperty("line.separator") + "example:"
-								+ System.getProperty("line.separator") + "1 stone", "Error",
-						JOptionPane.ERROR_MESSAGE);
-				ErrorHandler.logError("User tried to input IDNames, no big deal");
+				JOptionPane.showMessageDialog(this, "That's not how you format IDNames \"" + line + System.getProperty("line.separator")
+						+ "example:" + System.getProperty("line.separator") + "1 stone", "Error", JOptionPane.ERROR_MESSAGE);
+				logger.config("User tried to input incorrectly formatted IDNames, no big deal");
 			}
 			line = br.readLine();
 		}
@@ -382,8 +396,8 @@ public class IDChanger extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// something changed - reset progress bars
-		pb_file.setValue(0);
-		pb_chunk.setValue(0);
+		status.pb_file.setValue(0);
+		status.pb_chunk.setValue(0);
 
 		// Open Save Folder
 		if ("openFolder".equals(e.getActionCommand())) {
@@ -411,13 +425,11 @@ public class IDChanger extends JFrame implements ActionListener {
 
 					} else {
 						cb_selectSaveGame.setSelectedIndex(saveGames.indexOf(f));
-						JOptionPane.showMessageDialog(this,
-								"The selected savegame is already in the list!", "Information",
+						JOptionPane.showMessageDialog(this, "The selected savegame is already in the list!", "Information",
 								JOptionPane.INFORMATION_MESSAGE);
 					}
 				} else {
-					JOptionPane.showMessageDialog(this, "Invalid savegame!", "Error",
-							JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, "Invalid savegame!", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		}
@@ -427,11 +439,10 @@ public class IDChanger extends JFrame implements ActionListener {
 			final JFileChooser fc = new JFileChooser();
 			String path;
 			try {
-				path = IDChanger.class.getProtectionDomain().getCodeSource().getLocation().toURI()
-						.getPath();
+				path = IDChanger.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
 				fc.setSelectedFile(new File((new File(path)).getParent(), "Patch.txt"));
 			} catch (URISyntaxException e1) {
-				ErrorHandler.logError(e1);
+				logger.log(Level.WARNING,"Unable to load Patch file",e1);
 			}
 
 			int returnVal = fc.showOpenDialog(this);
@@ -450,17 +461,14 @@ public class IDChanger extends JFrame implements ActionListener {
 								if (tr != null) {
 									addTranslation(tr);
 								} else {
-									ErrorHandler
-											.logError("Patch contains an invalid line, no big deal: "
-													+ strLine);
+									logger.config("Patch contains an invalid line, no big deal: " + strLine);
 								}
 
 							} catch (NumberFormatException e2) {
 								// JOptionPane.showMessageDialog(this,
 								// "That's not how you format translations \""+strLine+System.getProperty("line.separator")+"example:"+System.getProperty("line.separator")+"1 stone -> 3 dirt",
 								// "Error", JOptionPane.ERROR_MESSAGE);
-								ErrorHandler.logError("Patch contains an invalid line, no big deal"
-										+ strLine);
+								ErrorHandler.logError("Patch contains an invalid line, no big deal" + strLine);
 								continue;
 							}
 
@@ -484,18 +492,13 @@ public class IDChanger extends JFrame implements ActionListener {
 				String currentSource = (String) cb_selectSourceID.getSelectedItem();
 				String currentTarget = (String) cb_selectTargetID.getSelectedItem();
 
-				TranslationRecord tr = TranslationRecordFactory.createTranslationRecord(
-						currentSource, currentTarget);
+				TranslationRecord tr = TranslationRecordFactory.createTranslationRecord(currentSource, currentTarget);
 				if (tr != null) {
 					addTranslation(tr);
 				} else {
-					JOptionPane.showMessageDialog(
-							this,
-							"That's not how you format translations"
-									+ System.getProperty("line.separator") + "example:"
-									+ System.getProperty("line.separator") + "1 stone"
-									+ System.getProperty("line.separator") + "3 dirt", "Error",
-							JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, "That's not how you format translations" + System.getProperty("line.separator")
+							+ "example:" + System.getProperty("line.separator") + "1 stone" + System.getProperty("line.separator")
+							+ "3 dirt", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 				// new version uses adds -> targetid to string
 
@@ -503,12 +506,8 @@ public class IDChanger extends JFrame implements ActionListener {
 				// model.add(index,
 				// (String)cb_selectSourceID.getSelectedItem()+);
 			} catch (NumberFormatException badinput) {
-				JOptionPane.showMessageDialog(
-						this,
-						"That's not how you format translations"
-								+ System.getProperty("line.separator") + "example:"
-								+ System.getProperty("line.separator") + "1 stone -> 3 dirt",
-						"Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(this, "That's not how you format translations" + System.getProperty("line.separator")
+						+ "example:" + System.getProperty("line.separator") + "1 stone -> 3 dirt", "Error", JOptionPane.ERROR_MESSAGE);
 				// ErrorHandler.logError(badinput);
 			}
 		}
@@ -530,8 +529,7 @@ public class IDChanger extends JFrame implements ActionListener {
 			FileWriter fstream = null;
 			try {
 				if ((saveGames == null) || (saveGames.size() == 0)) {
-					JOptionPane.showMessageDialog(this, "No save game has been chosen!", "Warning",
-							JOptionPane.WARNING_MESSAGE);
+					JOptionPane.showMessageDialog(this, "No save game has been chosen!", "Warning", JOptionPane.WARNING_MESSAGE);
 					return;
 				}
 
@@ -541,8 +539,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				final World world = new World(saveGames.get(saveIndex));
 
 				if (model.size() == 0) {
-					JOptionPane.showMessageDialog(this, "No IDs have been chosen!", "Warning",
-							JOptionPane.WARNING_MESSAGE);
+					JOptionPane.showMessageDialog(this, "No IDs have been chosen!", "Warning", JOptionPane.WARNING_MESSAGE);
 					return;
 				}
 				// new version use a hashmap to record what blocks to transmute
@@ -575,13 +572,12 @@ public class IDChanger extends JFrame implements ActionListener {
 				worker.execute();
 			} catch (IOException e1) {
 				if (ErrorHandler.logError(e1)) {
-					JOptionPane.showMessageDialog(this,
-							"An error has occured and a log has been created.", "Error",
+					JOptionPane.showMessageDialog(this, "An error has occured and a log has been created.", "Error",
 							JOptionPane.WARNING_MESSAGE);
-				}else{
+				} else {
 					JOptionPane.showMessageDialog(this,
-							"An error has occured and another error occured while trying to create a log\n The original error message:"+e1.getMessage() , "Error",
-							JOptionPane.WARNING_MESSAGE);
+							"An error has occured and another error occured while trying to create a log\n The original error message:"
+									+ e1.getMessage(), "Error", JOptionPane.WARNING_MESSAGE);
 				}
 			} finally {
 				if (log != null) {
@@ -608,8 +604,7 @@ public class IDChanger extends JFrame implements ActionListener {
 	private void addTranslation(TranslationRecord tr) {
 		for (int i = 0; i < model.size(); i++) {
 			if (((TranslationRecord) model.get(i)).source.equals(tr.source)) {
-				JOptionPane.showMessageDialog(this, "Source ID " + tr.source
-						+ " is already being translated!", "Information",
+				JOptionPane.showMessageDialog(this, "Source ID " + tr.source + " is already being translated!", "Information",
 						JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
@@ -623,14 +618,26 @@ public class IDChanger extends JFrame implements ActionListener {
 	}
 
 	public static void main(String[] args) {
+		try {
+			initRootLogger();
+		} catch (SecurityException | IOException e) {
+			logger.log(Level.WARNING, "Unable to create log File", e);
+			return;
+		}
 
 		try {
-			//Use system specific look and feel
-			//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			// Use system specific look and feel
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
-			
+			logger.log(Level.WARNING, "Unable to set look and feel", e);
 		}
-		IDChanger frame = new IDChanger("mIDas *GOLD* V0.2.2 ");
+		try {
+			IDChanger frame = new IDChanger("mIDas *GOLD* V0.2.4 ");
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "Runtime Exception", e);
+		}
+
+		logger.config("System Look and Feel:" + UIManager.getSystemLookAndFeelClassName().toString());
 
 	}
 }
