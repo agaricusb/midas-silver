@@ -14,6 +14,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -27,19 +29,15 @@ public class World {
 	private File							baseFolder;
 	private ArrayList<RegionFileExtended>	regionFiles;
 	private ArrayList<PlayerFile>			playerFiles;
+	private Logger							logger	= Logger.getLogger(this.getClass().getName());
 
-	public World(File path) {
+	public World(File path) throws IOException {
 		baseFolder = path;
-		try {
-			regionFiles = getRegionFiles();
-			playerFiles = getPlayerFiles();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		regionFiles = getRegionFiles();
+		playerFiles = getPlayerFiles();
 	}
 
-	public void convert(IDChanger UI, HashMap<BlockUID, BlockUID> translations) throws IOException {
+	public void convert(IDChanger UI, HashMap<BlockUID, BlockUID> translations) {
 		Status status = UI.status;
 		status.changedChest = 0;
 		status.changedPlaced = 0;
@@ -49,9 +47,14 @@ public class World {
 
 		// player inventories
 		status.pb_file.setMaximum(playerFiles.size() - 1);
-
 		// load plugins
-		PluginLoader pl = new PluginLoader();
+		PluginLoader pl;
+		try {
+			pl = new PluginLoader();
+		} catch (FileNotFoundException e) {
+			logger.log(Level.SEVERE, "Unable to load plugins: " + e.getMessage(), e);
+			return;
+		}
 		pl.loadPlugins();
 		ArrayList<ConverterPlugin> regionPlugins = pl.getPluginsOfType(PluginType.REGION);
 		ArrayList<ConverterPlugin> playerPlugins = pl.getPluginsOfType(PluginType.PLAYER);
@@ -59,15 +62,29 @@ public class World {
 		for (PlayerFile playerFile : playerFiles) {
 			status.pb_file.setValue(count_file++);
 			status.lb_file.setText("Current File: " + playerFile.getName());
-			DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(playerFile))));
+			DataInputStream dis = null;
+			try {
+				dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(playerFile))));
 
-			CompoundTag root = NbtIo.read(dis);
-			for (ConverterPlugin plugin : playerPlugins) {
-				plugin.convert(status, root, translations);
+				CompoundTag root = NbtIo.read(dis);
+				for (ConverterPlugin plugin : playerPlugins) {
+					plugin.convert(status, root, translations);
+				}
+				DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(playerFile)));
+				NbtIo.writeCompressed(root, dos);
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Unable to convert player inventories", e);
+				return;
+			} finally {
+				if (dis != null) {
+					try {
+						dis.close();
+					} catch (IOException e) {
+						logger.log(Level.WARNING, "Unable to close input stream", e);
+					}
+				}
 			}
-			dis.close();
-			DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(playerFile)));
-			NbtIo.writeCompressed(root, dos);
+
 		}
 		// PROGESSBAR FILE
 		count_file = 0;
@@ -75,12 +92,21 @@ public class World {
 			// No valid region files found
 			return;
 		}
+		status.pb_file.setValue(0);
 		status.pb_file.setMaximum(regionFiles.size() - 1);
 
 		for (RegionFileExtended r : regionFiles) {
+			status.lb_file.setText("Current File: " + r.fileName.getName());
+			status.pb_file.setMaximum(regionFiles.size() - 1);
 			status.pb_file.setValue(count_file++);
-			status.lb_file.setText("Current File: " + r.fileName);
-			r.convert(status, translations, regionPlugins);
+			
+
+			try {
+				r.convert(status, translations, regionPlugins);
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Unable to convert placed blocks", e);
+				return;
+			}
 		}
 		long duration = System.currentTimeMillis() - beginTime;
 		JOptionPane.showMessageDialog(UI, "Done in " + duration + "ms" + System.getProperty("line.separator") + status.changedPlaced
@@ -122,6 +148,9 @@ public class World {
 		// Find all region files
 		File[] files = regionDir.listFiles(mcaFiles);
 		ArrayList<RegionFileExtended> result = new ArrayList<RegionFileExtended>();
+		if(files == null ){
+			throw new RuntimeException("No region files found");
+		}
 
 		for (int i = 0; i < files.length; i++) {
 			result.add(new RegionFileExtended(files[i]));
@@ -156,7 +185,7 @@ public class World {
 		if (levelDat.exists()) {
 			result.add(new PlayerFile(levelDat.getAbsolutePath(), "level.dat"));
 		}
-		
+
 		return result;
 	}
 }

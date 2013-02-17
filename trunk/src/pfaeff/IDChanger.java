@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Kai Röhr 
+ * Copyright 2011 Kai Rohr 
  *    
  *
  *    This file is part of mIDas.
@@ -22,6 +22,7 @@ package pfaeff;
 
 import havocx42.BlockUID;
 import havocx42.ConverterPlugin;
+import havocx42.EventQueueProxy;
 import havocx42.FileListCellRenderer;
 import havocx42.PluginLoader;
 import havocx42.Status;
@@ -29,10 +30,11 @@ import havocx42.TranslationRecord;
 import havocx42.TranslationRecordFactory;
 import havocx42.World;
 import havocx42.logging.PopupHandler;
-import havocx42.ErrorHandler;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -50,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.MemoryHandler;
@@ -125,14 +128,17 @@ public class IDChanger extends JFrame implements ActionListener {
 	}
 
 	private static void initRootLogger() throws SecurityException, IOException {
+
 		FileHandler fileHandler;
 		fileHandler = new FileHandler("midasLog.%u.%g.txt", 1024 * 1024, 3, true);
-		fileHandler.setLevel(Level.ALL);
-		MemoryHandler memoryHandler = new MemoryHandler(fileHandler, 300, Level.SEVERE);
-		memoryHandler.setLevel(Level.ALL);
+		fileHandler.setLevel(Level.CONFIG);
 		Logger rootLogger = Logger.getLogger("");
-		rootLogger.setLevel(Level.ALL);
-		rootLogger.addHandler(memoryHandler);
+		Handler[] handlers = rootLogger.getHandlers();
+		for (Handler handler : handlers) {
+			handler.setLevel(Level.INFO);
+		}
+		rootLogger.setLevel(Level.CONFIG);
+		rootLogger.addHandler(fileHandler);
 	}
 
 	private void initSaveGames() {
@@ -147,12 +153,12 @@ public class IDChanger extends JFrame implements ActionListener {
 			String path = IDChanger.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
 			File f = new File((new File(path)).getParent(), "IDNames.txt");
 			if (f.exists()) {
-					idNames = readFile(f);
-			}else{
+				idNames = readFile(f);
+			} else {
 				logger.info("IDNames.txt does not exist");
 			}
-		} catch (IOException|URISyntaxException e1) {
-			logger.log(Level.WARNING,"Unable to load IDNames.txt",e1);
+		} catch (IOException | URISyntaxException e1) {
+			logger.log(Level.WARNING, "Unable to load IDNames.txt", e1);
 		}
 	}
 
@@ -363,7 +369,7 @@ public class IDChanger extends JFrame implements ActionListener {
 		try {
 			rf = NBTFileIO.getRegionFiles(f);
 		} catch (IOException e) {
-			logger.log(Level.WARNING, "Unable to load save file",e);
+			logger.log(Level.WARNING, "Unable to load save file", e);
 			return false;
 		}
 		return ((rf != null) && (rf.size() > 0));
@@ -442,7 +448,7 @@ public class IDChanger extends JFrame implements ActionListener {
 				path = IDChanger.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
 				fc.setSelectedFile(new File((new File(path)).getParent(), "Patch.txt"));
 			} catch (URISyntaxException e1) {
-				logger.log(Level.WARNING,"Unable to load Patch file",e1);
+				logger.log(Level.WARNING, "Unable to load Patch file", e1);
 			}
 
 			int returnVal = fc.showOpenDialog(this);
@@ -461,14 +467,14 @@ public class IDChanger extends JFrame implements ActionListener {
 								if (tr != null) {
 									addTranslation(tr);
 								} else {
-									logger.config("Patch contains an invalid line, no big deal: " + strLine);
+									logger.info("Patch contains an invalid line, no big deal: " + strLine);
 								}
 
 							} catch (NumberFormatException e2) {
 								// JOptionPane.showMessageDialog(this,
 								// "That's not how you format translations \""+strLine+System.getProperty("line.separator")+"example:"+System.getProperty("line.separator")+"1 stone -> 3 dirt",
 								// "Error", JOptionPane.ERROR_MESSAGE);
-								ErrorHandler.logError("Patch contains an invalid line, no big deal" + strLine);
+								logger.info("Patch contains an invalid line, no big deal" + strLine);
 								continue;
 							}
 
@@ -478,7 +484,7 @@ public class IDChanger extends JFrame implements ActionListener {
 						fstream.close();
 
 					} catch (Exception filewriting) {
-						ErrorHandler.logError(filewriting);
+						logger.log(Level.WARNING, "Unable to open patch file", filewriting);
 					}
 				}
 
@@ -523,44 +529,39 @@ public class IDChanger extends JFrame implements ActionListener {
 		if ("start".equals(e.getActionCommand())) {
 			// Savegame
 			int saveIndex = cb_selectSaveGame.getSelectedIndex();
-			// System.out.println("Selected Savegame " +
-			// saveGames.get(saveIndex));
-			BufferedWriter log = null;
-			FileWriter fstream = null;
+			if ((saveGames == null) || (saveGames.size() == 0)) {
+				JOptionPane.showMessageDialog(this, "No save game has been chosen!", "Warning", JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+
+			if (saveIndex < 0) {
+				return;
+			}
+
+			if (model.size() == 0) {
+				JOptionPane.showMessageDialog(this, "No IDs have been chosen!", "Warning", JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			// new version use a hashmap to record what blocks to transmute
+			// to what.
+			final HashMap<BlockUID, BlockUID> translations = new HashMap<BlockUID, BlockUID>();
+
+			for (int i = 0; i < model.size(); i++) {
+				TranslationRecord tr = (TranslationRecord) model.get(i);
+				logger.config(tr.toString());
+				if (tr.source != null && tr.target != null) {
+					translations.put(tr.source, tr.target);
+				}
+
+			}
+
+			final IDChanger UI = this;
+			// change block ids
+
+			final World world;
 			try {
-				if ((saveGames == null) || (saveGames.size() == 0)) {
-					JOptionPane.showMessageDialog(this, "No save game has been chosen!", "Warning", JOptionPane.WARNING_MESSAGE);
-					return;
-				}
+				world = new World(saveGames.get(saveIndex));
 
-				if (saveIndex < 0) {
-					return;
-				}
-				final World world = new World(saveGames.get(saveIndex));
-
-				if (model.size() == 0) {
-					JOptionPane.showMessageDialog(this, "No IDs have been chosen!", "Warning", JOptionPane.WARNING_MESSAGE);
-					return;
-				}
-				// new version use a hashmap to record what blocks to transmute
-				// to what.
-				final HashMap<BlockUID, BlockUID> translations = new HashMap<BlockUID, BlockUID>();
-				// Create file
-				fstream = new FileWriter("lasttranslation.txt");
-				log = new BufferedWriter(fstream);
-
-				for (int i = 0; i < model.size(); i++) {
-					TranslationRecord tr = (TranslationRecord) model.get(i);
-					log.write(tr.toString());
-					log.newLine();
-					if (tr.source != null && tr.target != null) {
-						translations.put(tr.source, tr.target);
-					}
-
-				}
-
-				final IDChanger UI = this;
-				// change block ids
 				SwingWorker worker = new SwingWorker() {
 					@Override
 					protected Object doInBackground() throws Exception {
@@ -568,34 +569,11 @@ public class IDChanger extends JFrame implements ActionListener {
 						return null;
 					}
 				};
+
 				// worker.addPropertyChangeListener(this);
 				worker.execute();
 			} catch (IOException e1) {
-				if (ErrorHandler.logError(e1)) {
-					JOptionPane.showMessageDialog(this, "An error has occured and a log has been created.", "Error",
-							JOptionPane.WARNING_MESSAGE);
-				} else {
-					JOptionPane.showMessageDialog(this,
-							"An error has occured and another error occured while trying to create a log\n The original error message:"
-									+ e1.getMessage(), "Error", JOptionPane.WARNING_MESSAGE);
-				}
-			} finally {
-				if (log != null) {
-					try {
-						log.close();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
-				if (fstream != null) {
-					try {
-						fstream.close();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
+				logger.log(Level.WARNING, "Unable to open world, are you sure you have selected a save?");
 			}
 		}
 		return;
@@ -624,6 +602,8 @@ public class IDChanger extends JFrame implements ActionListener {
 			logger.log(Level.WARNING, "Unable to create log File", e);
 			return;
 		}
+		EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
+		queue.push(new EventQueueProxy());
 
 		try {
 			// Use system specific look and feel
