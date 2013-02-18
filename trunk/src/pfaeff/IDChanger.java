@@ -612,7 +612,8 @@ public class IDChanger extends JFrame implements ActionListener {
 			logger.log(Level.WARNING, "Unable to set look and feel", e);
 		}
 		try {
-			IDChanger frame = new IDChanger("mIDas *GOLD* V0.2.5 ");
+			IDChanger frame = new IDChanger("mIDas *GOLD* V0.2.4");
+
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "Runtime Exception", e);
 		}
