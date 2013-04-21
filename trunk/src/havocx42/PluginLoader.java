@@ -36,7 +36,8 @@ public class PluginLoader {
 
 		loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 
-		try (MyClassLoader myLoader = new MyClassLoader(loader.getURLs())) {
+		try {
+			MyClassLoader myLoader = new MyClassLoader(loader.getURLs());
 			ExtensionFilter filter = new ExtensionFilter("jar");
 			File[] files = pluginDirectory.listFiles(filter);
 			for (File file : files) {
