@@ -111,10 +111,10 @@ public class World {
             }
         }
         long duration = System.currentTimeMillis() - beginTime;
-        JOptionPane.showMessageDialog(UI, "Done in " + duration + "ms" + System.getProperty("line.separator") + status.changedPlaced
+        logger.log(Level.INFO, "Done in " + duration + "ms" + System.getProperty("line.separator") + status.changedPlaced
                 + " placed blocks changed." + System.getProperty("line.separator") + status.changedPlayer
                 + " blocks in player inventories changed." + System.getProperty("line.separator") + status.changedChest
-                + " blocks in entity inventories changed.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                + " blocks in entity inventories changed.");
     }
 
     private ArrayList<RegionFileExtended> getRegionFiles() throws IOException {
