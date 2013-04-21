@@ -38,7 +38,9 @@ import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -62,6 +64,8 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
 import region.RegionFile;
 
 public class IDChanger {
@@ -83,8 +87,7 @@ public class IDChanger {
 
     private static Logger        logger                = Logger.getLogger(IDChanger.class.getName());
 
-    public IDChanger(String title) throws IOException {
-
+    public IDChanger() throws IOException {
         initIDNames();
     }
 
@@ -224,15 +227,44 @@ public class IDChanger {
         return;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        initRootLogger();
+
+        OptionSet options = null;
+
+        OptionParser parser = new OptionParser() {
+            {
+                acceptsAll(asList("?", "help"), "Show the help");
+
+                acceptsAll(asList("p", "patch-file"), "Patch file to use")
+                        .withRequiredArg()
+                        .ofType(File.class);
+
+                acceptsAll(asList("i", "input-save-game"), "Save game to read as input")
+                        .withRequiredArg()
+                        .ofType(File.class);
+            }
+        };
+
         try {
-            initRootLogger();
-        } catch (SecurityException e) {
-            logger.log(Level.WARNING, "Unable to create log File", e);
-            return;
-        } catch (IOException e) {
-            logger.log(Level.WARNING, "Unable to create log File", e);
+            options = parser.parse(args);
+        } catch (joptsimple.OptionException ex) {
+            logger.log(Level.SEVERE, ex.getLocalizedMessage());
             return;
         }
+
+        if (!options.has("patch-file") || !options.has("input-save-game")) {
+            parser.printHelpOn(System.out);
+            System.exit(1);
+        }
+
+        IDChanger self = new IDChanger();
+
+        self.readPatchFile((File) options.valueOf("patch-file"));
+        self.convert((File) options.valueOf("input-save-game"));
+    }
+
+    private static List<String> asList(String... params) {
+        return Arrays.asList(params);
     }
 }
