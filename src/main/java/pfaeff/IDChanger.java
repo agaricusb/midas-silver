@@ -35,13 +35,7 @@ import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -143,16 +137,13 @@ public class IDChanger extends JFrame implements ActionListener {
 
     private void initIDNames() {
         try {
-            String path = IDChanger.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-            File f = new File((new File(path)).getParent(), "IDNames.txt");
-            if (f.exists()) {
-                idNames = readFile(f);
+            InputStream inputStream = IDChanger.class.getResourceAsStream("/IDNames.txt");
+            if (inputStream != null) {
+                idNames = readFile(inputStream);
             } else {
                 logger.info("IDNames.txt does not exist");
             }
         } catch (IOException e1) {
-            logger.log(Level.WARNING, "Unable to load IDNames.txt", e1);
-        } catch (URISyntaxException e1) {
             logger.log(Level.WARNING, "Unable to load IDNames.txt", e1);
         }
     }
@@ -371,9 +362,9 @@ public class IDChanger extends JFrame implements ActionListener {
 
     }
 
-    private ArrayList<String> readFile(File f) throws IOException {
+    private ArrayList<String> readFile(InputStream f) throws IOException {
         ArrayList<String> result = new ArrayList<String>();
-        BufferedReader br = new BufferedReader(new FileReader(f));
+        BufferedReader br = new BufferedReader(new InputStreamReader(f));
         String line = br.readLine();
         while (line != null) {
             /*

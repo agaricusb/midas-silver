@@ -32,7 +32,7 @@ work with future versions, if the level format isn't changed drastically.
 Installation:
 =============
 
-Extract mIDas.jar and IDNames.txt into the same folder and doubleclick mIDas.jar to start.
+Doubleclick mIDas.jar to start.
 If that doesn't work, use the console command "java -jar mIDas.jar".
 
 
@@ -58,7 +58,6 @@ Additional notes:
 
 - I only tested this tool under Windows, so there might be problems on other systems. 
   Though it might work with some restrictions.
-- ID names can be customized in the IDNames.txt
 - I know the gui (and its code) is a mess. It will either be rewritten or cleaned up.  
 
 
