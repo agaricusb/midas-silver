@@ -23,7 +23,11 @@ import javax.swing.JOptionPane;
 
 import com.mojang.nbt.*;
 
+import havocx42.buildcraftpipesplugin.BuildCraftPipesPlugin;
 import pfaeff.IDChanger;
+import plugins.convertblocksplugin.ConvertBlocks;
+import plugins.convertitemsplugin.ConvertItems;
+import plugins.convertplayerinventoriesplugin.ConvertPlayerInventories;
 
 public class World {
     private File                            baseFolder;
@@ -47,17 +51,15 @@ public class World {
 
         // player inventories
         status.pb_file.setMaximum(playerFiles.size() - 1);
-        // load plugins
-        PluginLoader pl;
-        try {
-            pl = new PluginLoader();
-        } catch (FileNotFoundException e) {
-            logger.log(Level.SEVERE, "Unable to load plugins: " + e.getMessage(), e);
-            return;
-        }
-        pl.loadPlugins();
-        ArrayList<ConverterPlugin> regionPlugins = pl.getPluginsOfType(PluginType.REGION);
-        ArrayList<ConverterPlugin> playerPlugins = pl.getPluginsOfType(PluginType.PLAYER);
+
+        // load integrated plugins
+        ArrayList<ConverterPlugin> regionPlugins = new ArrayList<ConverterPlugin>();
+        regionPlugins.add(new ConvertBlocks());
+        regionPlugins.add(new ConvertItems());
+        regionPlugins.add(new BuildCraftPipesPlugin());
+
+        ArrayList<ConverterPlugin> playerPlugins = new ArrayList<ConverterPlugin>();
+        playerPlugins.add(new ConvertPlayerInventories());
 
         for (PlayerFile playerFile : playerFiles) {
             status.pb_file.setValue(count_file++);

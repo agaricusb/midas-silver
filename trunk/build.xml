@@ -4,10 +4,6 @@
 	<property name="build" location="build" />
 	<property name="dist" location="dist" />
 	<property name="lib" location="lib" />
-	<property name="BlocksPluginDir" location="../ConvertBlocksPlugin" />
-	<property name="BuildCraftPipesPluginDir" location="../ConvertBuildCraftPipesPlugin" />
-	<property name="ItemsPluginDir" location="../ConvertItemsPlugin" />
-	<property name="PlayerInventoriesPluginDir" location="../ConvertPlayerInventoriesPlugin" />
 
 	<target name="init">
 		<!-- Create the time stamp -->
@@ -30,25 +26,8 @@
 		</jar>
 	</target>
 
-	<target name="compileBlocksPlugin" depends="createPluginLib">
-		<ant inheritAll="false" antfile="${BlocksPluginDir}/build.xml" target="dist" />
-	</target>
-
-	<target name="compileBuildCraftPipesPlugin" depends="createPluginLib">
-		<ant inheritAll="false" dir="${BuildCraftPipesPluginDir}" antfile="${BuildCraftPipesPluginDir}/build.xml" target="dist" />
-	</target>
-
-	<target name="compileItemsPlugin" depends="createPluginLib">
-		<ant inheritAll="false" dir="${ItemsPluginDir}" antfile="${ItemsPluginDir}/build.xml" target="dist" />
-	</target>
-
-	<target name="compilePlayerInventoriesPlugin" depends="createPluginLib">
-		<ant inheritAll="false" dir="${PlayerInventoriesPluginDir}" antfile="${PlayerInventoriesPluginDir}/build.xml" target="dist" />
-	</target>
-
-	<target name="dist" depends="compileMidas,compileBlocksPlugin,compileBuildCraftPipesPlugin,compileItemsPlugin,compilePlayerInventoriesPlugin" description="generate the distribution">
+	<target name="dist" depends="compileMidas" description="generate the distribution">
 		<mkdir dir="${dist}" />
-		<mkdir dir="${dist}/plugins" />
 
 		<jar destfile="${dist}/mIDasGold.jar" basedir="${build}">
 			<manifest>
@@ -57,18 +36,6 @@
 		</jar>
 		<copy file="IDNames.txt" todir="${dist}" />
 		<copy file="README.txt" todir="${dist}" />
-		<copy overwrite="true" todir="${dist}/plugins">
-			<fileset dir="${BlocksPluginDir}/dist/" />
-		</copy>
-		<copy overwrite="true" todir="${dist}/plugins">
-			<fileset dir="${BuildCraftPipesPluginDir}/dist/" />
-		</copy>
-		<copy overwrite="true" todir="${dist}/plugins">
-			<fileset dir="${ItemsPluginDir}/dist/" />
-		</copy>
-		<copy overwrite="true" todir="${dist}/plugins">
-			<fileset dir="${PlayerInventoriesPluginDir}/dist/" />
-		</copy>
 	</target>
 
 	<target name="clean" description="clean up">
