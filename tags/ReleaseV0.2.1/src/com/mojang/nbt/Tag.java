@@ -116,26 +116,26 @@ public abstract class Tag {
         tag.write(dos);
     }
     
-	public Tag findChildByName(String name, boolean recursive) {
-		if (this instanceof ListTag){
-			return((ListTag)this).findChildByName(name, recursive);
-		}else if(this instanceof CompoundTag){
-			return((CompoundTag)this).findChildByName(name, recursive);
-		}else{
-			return null;
-		}
-	}
-	
-	public void findAllChildrenByName(ArrayList<Tag> result, String name, boolean recursive) {
-		if (result == null) {
-			result = new ArrayList<Tag>();
-		}
-		if (this instanceof ListTag){
-			((ListTag)this).findAllChildrenByName(result, name, recursive);
-		}else if(this instanceof CompoundTag){
-			((CompoundTag)this).findAllChildrenByName(result, name, recursive);
-		}
-	}
+    public Tag findChildByName(String name, boolean recursive) {
+        if (this instanceof ListTag){
+            return((ListTag)this).findChildByName(name, recursive);
+        }else if(this instanceof CompoundTag){
+            return((CompoundTag)this).findChildByName(name, recursive);
+        }else{
+            return null;
+        }
+    }
+    
+    public void findAllChildrenByName(ArrayList<Tag> result, String name, boolean recursive) {
+        if (result == null) {
+            result = new ArrayList<Tag>();
+        }
+        if (this instanceof ListTag){
+            ((ListTag)this).findAllChildrenByName(result, name, recursive);
+        }else if(this instanceof CompoundTag){
+            ((CompoundTag)this).findAllChildrenByName(result, name, recursive);
+        }
+    }
 
     public static Tag newTag(byte type, String name) {
         switch (type) {

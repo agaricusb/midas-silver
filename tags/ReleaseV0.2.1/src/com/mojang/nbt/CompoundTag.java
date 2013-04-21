@@ -195,40 +195,40 @@ public class CompoundTag extends Tag {
         return false;
     }
     
-	public Tag findChildByName(String name, boolean recursive) {
-		if (tags != null) {
-			for (Tag t : tags.values()) {
-				if (t.getName() != null) {
-					if (t.getName().equals(name)) {
-						return t;
-					}
-				}
-				if (recursive) {
-					Tag result = t.findChildByName(name, true);
-					if (result != null) {
-						return result;
-					}
-				}				
-			}
-		}
-		return null;
-	}
-	
-	public void findAllChildrenByName(ArrayList<Tag> result, String name, boolean recursive) {
-		if (result == null) {
-			result = new ArrayList<Tag>();
-		}
-		if (tags.values() != null) {
-			for (Tag t : tags.values()) {
-				if (t.getName() != null) {
-					if (t.getName().equals(name)) {
-						result.add(t);
-					}
-				}
-				if (recursive) {
-					t.findAllChildrenByName(result, name, true);
-				}				
-			}
-		}
-	}
+    public Tag findChildByName(String name, boolean recursive) {
+        if (tags != null) {
+            for (Tag t : tags.values()) {
+                if (t.getName() != null) {
+                    if (t.getName().equals(name)) {
+                        return t;
+                    }
+                }
+                if (recursive) {
+                    Tag result = t.findChildByName(name, true);
+                    if (result != null) {
+                        return result;
+                    }
+                }                
+            }
+        }
+        return null;
+    }
+    
+    public void findAllChildrenByName(ArrayList<Tag> result, String name, boolean recursive) {
+        if (result == null) {
+            result = new ArrayList<Tag>();
+        }
+        if (tags.values() != null) {
+            for (Tag t : tags.values()) {
+                if (t.getName() != null) {
+                    if (t.getName().equals(name)) {
+                        result.add(t);
+                    }
+                }
+                if (recursive) {
+                    t.findAllChildrenByName(result, name, true);
+                }                
+            }
+        }
+    }
 }

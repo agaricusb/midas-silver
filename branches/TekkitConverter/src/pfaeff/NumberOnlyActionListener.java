@@ -27,36 +27,36 @@ import java.util.ArrayList;
 import javax.swing.JComboBox;
 
 public class NumberOnlyActionListener implements ActionListener {
-	
-	private ArrayList<String> exceptions;
-	private int minValue = Integer.MIN_VALUE;
-	private int maxValue = Integer.MAX_VALUE;
-	
-	public NumberOnlyActionListener(ArrayList<String> exceptions, int minValue, int maxValue) {
-		this.exceptions = exceptions;
-		this.minValue = minValue;
-		this.maxValue = maxValue;
-	}
+    
+    private ArrayList<String> exceptions;
+    private int minValue = Integer.MIN_VALUE;
+    private int maxValue = Integer.MAX_VALUE;
+    
+    public NumberOnlyActionListener(ArrayList<String> exceptions, int minValue, int maxValue) {
+        this.exceptions = exceptions;
+        this.minValue = minValue;
+        this.maxValue = maxValue;
+    }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() instanceof JComboBox) {
-			JComboBox cb = (JComboBox)e.getSource();
-			String item = (String)cb.getSelectedItem();
-			
-			if (exceptions.contains(item)) {
-				return;
-			}
-			
-			try {
-				int val = Integer.parseInt(item);
-				if ((val > maxValue) || (val < minValue)) {
-					cb.setSelectedIndex(0);
-				}
-			} catch(NumberFormatException ex) {
-				//cb.setSelectedIndex(0);
-			}
-		}
-	}
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() instanceof JComboBox) {
+            JComboBox cb = (JComboBox)e.getSource();
+            String item = (String)cb.getSelectedItem();
+            
+            if (exceptions.contains(item)) {
+                return;
+            }
+            
+            try {
+                int val = Integer.parseInt(item);
+                if ((val > maxValue) || (val < minValue)) {
+                    cb.setSelectedIndex(0);
+                }
+            } catch(NumberFormatException ex) {
+                //cb.setSelectedIndex(0);
+            }
+        }
+    }
 
 }

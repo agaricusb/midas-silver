@@ -28,33 +28,33 @@ import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
 public class CBRenderer extends JLabel implements ListCellRenderer {
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -646755438286846622L;
-	public int maxIndex = -1;
+    
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -646755438286846622L;
+    public int maxIndex = -1;
 
-	@Override
-	public Component getListCellRendererComponent(JList list, Object value,	int index, boolean isSelected, boolean cellHasFocus) {
-		setText(value.toString());
-		setOpaque(true);
-		if ((index % 2) == 1) {
-			setBackground(new Color(0.6f, 1.0f, 0.6f));
-		} else {
-			setBackground(Color.white);
-		}	
-		
-		if (isSelected) {
-			setBackground(new Color(0.6f, 0.6f, 1.0f));
-		}
-		
-		if (index > maxIndex) {
-			setForeground(Color.red);
-		} else {
-			setForeground(Color.black);
-		}
-		return this;
-	}
+    @Override
+    public Component getListCellRendererComponent(JList list, Object value,    int index, boolean isSelected, boolean cellHasFocus) {
+        setText(value.toString());
+        setOpaque(true);
+        if ((index % 2) == 1) {
+            setBackground(new Color(0.6f, 1.0f, 0.6f));
+        } else {
+            setBackground(Color.white);
+        }    
+        
+        if (isSelected) {
+            setBackground(new Color(0.6f, 0.6f, 1.0f));
+        }
+        
+        if (index > maxIndex) {
+            setForeground(Color.red);
+        } else {
+            setForeground(Color.black);
+        }
+        return this;
+    }
 
 }

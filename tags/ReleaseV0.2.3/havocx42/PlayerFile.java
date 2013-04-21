@@ -19,17 +19,17 @@ import com.mojang.nbt.*;
 import pfaeff.IDChanger;
 
 public class PlayerFile extends File {
-	
-	private String name;
+    
+    private String name;
 
-	public PlayerFile(String location,String name) throws FileNotFoundException {
-		super(location);
-		this.name = name;
-	}
-	
-	public String getName(){
-		return name;
-	}
+    public PlayerFile(String location,String name) throws FileNotFoundException {
+        super(location);
+        this.name = name;
+    }
+    
+    public String getName(){
+        return name;
+    }
 
 
 

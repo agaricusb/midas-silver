@@ -30,77 +30,77 @@ import java.util.ArrayList;
 import region.RegionFile;
 
 public class NBTFileIO {
-	/**
-	 * Returns a list of region files for a specific world
-	 * 
-	 * @param baseFolder
-	 *            Folder that contains the level files and the region directory
-	 * @return A list of region files
-	 * @throws IOException
-	 */
-	public static ArrayList<RegionFile> getRegionFiles(File baseFolder)
-			throws IOException {
-		// Switch to the "region" folder
-		File regionDir = new File(baseFolder, "region");
-		if(!regionDir.exists()){
-			regionDir= new File(baseFolder,"DIM1/region");
-		}
-		if(!regionDir.exists()){
-			regionDir= new File(baseFolder,"DIM-1/region");
-		}
+    /**
+     * Returns a list of region files for a specific world
+     * 
+     * @param baseFolder
+     *            Folder that contains the level files and the region directory
+     * @return A list of region files
+     * @throws IOException
+     */
+    public static ArrayList<RegionFile> getRegionFiles(File baseFolder)
+            throws IOException {
+        // Switch to the "region" folder
+        File regionDir = new File(baseFolder, "region");
+        if(!regionDir.exists()){
+            regionDir= new File(baseFolder,"DIM1/region");
+        }
+        if(!regionDir.exists()){
+            regionDir= new File(baseFolder,"DIM-1/region");
+        }
 
-		// Create a filter to only include mcr-files
-		FileFilter mcrFiles = new FileFilter() {
-			@Override
-			public boolean accept(File pathname) {
-				if (pathname.getName().toLowerCase().endsWith("mcr")||pathname.getName().toLowerCase().endsWith("mca")) {
-					return true;
-				}
-				return false;
-			}
-		};
-		// Find all region files
-		File[] files = regionDir.listFiles(mcrFiles);
-		if (files == null) {
-			return null;
-		}
-		ArrayList<RegionFile> result = new ArrayList<RegionFile>();
-		for (int i = 0; i < files.length; i++) {
-			result.add(new RegionFile(files[i]));
-		}
+        // Create a filter to only include mcr-files
+        FileFilter mcrFiles = new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                if (pathname.getName().toLowerCase().endsWith("mcr")||pathname.getName().toLowerCase().endsWith("mca")) {
+                    return true;
+                }
+                return false;
+            }
+        };
+        // Find all region files
+        File[] files = regionDir.listFiles(mcrFiles);
+        if (files == null) {
+            return null;
+        }
+        ArrayList<RegionFile> result = new ArrayList<RegionFile>();
+        for (int i = 0; i < files.length; i++) {
+            result.add(new RegionFile(files[i]));
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	/*public static ArrayList<PlayerFile> getDatFiles(File baseFolder)
-			throws IOException {
-		// Switch to the "region" folder
-		File playersDir = new File(baseFolder, "players");
-		File levelDat = new File(baseFolder, "level.dat");
-		// Create a filter to only include dat-files
-		FileFilter datFiles = new FileFilter() {
-			@Override
-			public boolean accept(File pathname) {
-				if (pathname.getName().toLowerCase().endsWith("dat")) {
-					return true;
-				}
-				return false;
-			}
-		};
-		ArrayList<PlayerFile> result = new ArrayList<PlayerFile>();
-		// Find all dat files
-		if (playersDir.exists()) {
-			File[] files = playersDir.listFiles(datFiles);
-			if (files != null) {
-				for (int i = 0; i < files.length; i++) {
-					result.add(new PlayerFile(files[i],files[i].getName(),"rw"));
-				}
-			}
-		}
-		if(levelDat.exists()){
-			result.add (new PlayerFile(levelDat,"level.dat","rw"));
-		}
+    /*public static ArrayList<PlayerFile> getDatFiles(File baseFolder)
+            throws IOException {
+        // Switch to the "region" folder
+        File playersDir = new File(baseFolder, "players");
+        File levelDat = new File(baseFolder, "level.dat");
+        // Create a filter to only include dat-files
+        FileFilter datFiles = new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                if (pathname.getName().toLowerCase().endsWith("dat")) {
+                    return true;
+                }
+                return false;
+            }
+        };
+        ArrayList<PlayerFile> result = new ArrayList<PlayerFile>();
+        // Find all dat files
+        if (playersDir.exists()) {
+            File[] files = playersDir.listFiles(datFiles);
+            if (files != null) {
+                for (int i = 0; i < files.length; i++) {
+                    result.add(new PlayerFile(files[i],files[i].getName(),"rw"));
+                }
+            }
+        }
+        if(levelDat.exists()){
+            result.add (new PlayerFile(levelDat,"level.dat","rw"));
+        }
 
-		return result;
-	}*/
+        return result;
+    }*/
 }

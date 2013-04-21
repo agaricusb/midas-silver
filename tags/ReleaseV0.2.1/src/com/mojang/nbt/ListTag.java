@@ -101,43 +101,43 @@ public class ListTag<T extends Tag> extends Tag {
     }
     
     public Tag findChildByName(String name, boolean recursive) {
-		if (list != null) {
-			for (Tag t : list) {
-				if (t.getName() != null) {
-					if (t.getName().equals("Sections")) {
-						System.out.println("here");
-					}
-					if (t.getName().equals(name)) {
-						return t;
-					}
-				}
-				if (recursive) {
-					Tag result = t.findChildByName(name, true);
-					if (result != null) {
-						return result;
-					}
-				}				
-			}
-		}
-		return null;
-	}
+        if (list != null) {
+            for (Tag t : list) {
+                if (t.getName() != null) {
+                    if (t.getName().equals("Sections")) {
+                        System.out.println("here");
+                    }
+                    if (t.getName().equals(name)) {
+                        return t;
+                    }
+                }
+                if (recursive) {
+                    Tag result = t.findChildByName(name, true);
+                    if (result != null) {
+                        return result;
+                    }
+                }                
+            }
+        }
+        return null;
+    }
     
-	public void findAllChildrenByName(ArrayList<Tag> result, String name, boolean recursive) {
-		if (result == null) {
-			result = new ArrayList<Tag>();
-		}
-		if (list != null) {
-			for (Tag t : list) {
-				if (t.getName() != null) {
-					if (t.getName().equals(name)) {
-						result.add(t);
-					}
-				}
-				if (recursive) {
-					t.findAllChildrenByName(result, name, true);
-				}				
-			}
-		}
-	}
+    public void findAllChildrenByName(ArrayList<Tag> result, String name, boolean recursive) {
+        if (result == null) {
+            result = new ArrayList<Tag>();
+        }
+        if (list != null) {
+            for (Tag t : list) {
+                if (t.getName() != null) {
+                    if (t.getName().equals(name)) {
+                        result.add(t);
+                    }
+                }
+                if (recursive) {
+                    t.findAllChildrenByName(result, name, true);
+                }                
+            }
+        }
+    }
 
 }

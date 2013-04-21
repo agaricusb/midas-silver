@@ -32,28 +32,28 @@ public enum OperatingSystem {
     OPENVMS ("OpenVMS",DEC_OS);
     
     
-	final private String label;
-	final private OperatingSystemFamily family;
+    final private String label;
+    final private OperatingSystemFamily family;
 
-	private OperatingSystem(String label, OperatingSystemFamily family) {
-		this.label = label;
-		this.family = family;
-	}
+    private OperatingSystem(String label, OperatingSystemFamily family) {
+        this.label = label;
+        this.family = family;
+    }
 
-	public String getLabel() {
-		return label;
-	}
+    public String getLabel() {
+        return label;
+    }
 
-	public OperatingSystemFamily getFamily() {
-		return family;
-	}
+    public OperatingSystemFamily getFamily() {
+        return family;
+    }
 
-	static public OperatingSystem resolve(String osName) {
-		for (OperatingSystem os : OperatingSystem.values()) {
-			if (os.label.equalsIgnoreCase(osName))
-				return os;
-		}
-		return null;
-	}
+    static public OperatingSystem resolve(String osName) {
+        for (OperatingSystem os : OperatingSystem.values()) {
+            if (os.label.equalsIgnoreCase(osName))
+                return os;
+        }
+        return null;
+    }
 }
 
