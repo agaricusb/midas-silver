@@ -43,15 +43,12 @@ import joptsimple.OptionSet;
 import region.RegionFile;
 
 public class IDChanger {
-    // new version use a hashmap to record what blocks to transmute
-    // to what.
-    final HashMap<BlockUID, BlockUID> translations = new HashMap<BlockUID, BlockUID>();
 
-    private static Logger        logger                = Logger.getLogger(IDChanger.class.getName());
+    public static Logger        logger                = Logger.getLogger(IDChanger.class.getName());
 
-    public IDChanger() throws IOException {
-        initIDNames();
-    }
+    public static int changedPlaced = 0;
+    public static int changedChest = 0;
+    public static int changedPlayer = 0;
 
     private static void initRootLogger() throws SecurityException, IOException {
 
@@ -67,20 +64,7 @@ public class IDChanger {
         rootLogger.addHandler(fileHandler);
     }
 
-    private void initIDNames() {
-        try {
-            InputStream inputStream = IDChanger.class.getResourceAsStream("/IDNames.txt");
-            if (inputStream != null) {
-                ArrayList<String> idNames = readFile(inputStream);
-            } else {
-                logger.info("IDNames.txt does not exist");
-            }
-        } catch (IOException e1) {
-            logger.log(Level.WARNING, "Unable to load IDNames.txt", e1);
-        }
-    }
-
-    private boolean isValidSaveGame(File f) {
+    private static boolean isValidSaveGame(File f) {
         ArrayList<RegionFile> rf;
         try {
             rf = NBTFileIO.getRegionFiles(f);
@@ -92,67 +76,58 @@ public class IDChanger {
 
     }
 
-    private ArrayList<String> readFile(InputStream f) throws IOException {
-        ArrayList<String> result = new ArrayList<String>();
-        BufferedReader br = new BufferedReader(new InputStreamReader(f));
-        String line = br.readLine();
-        while (line != null) {
-            /*
-             * if (!line.equals("")) { line = " " + line; } line = index + line;
-             */
-            try {
-                if (line.matches("[0-9]+(:?[0-9]+)? [0-9a-zA-Z.]+"))
-                    result.add(line);
+    private static HashMap<BlockUID, BlockUID> readPatchFile(File f) {
+        // new version use a hashmap to record what blocks to transmute
+        // to what.
+        final HashMap<BlockUID, BlockUID> translations = new HashMap<BlockUID, BlockUID>();
 
-            } catch (NumberFormatException e) {
-                logger.config("That's not how you format IDNames \"" + line + System.getProperty("line.separator")
-                        + "example:" + System.getProperty("line.separator") + "1 stone");
-                logger.config("User tried to input incorrectly formatted IDNames, no big deal");
-            }
-            line = br.readLine();
+        if (!f.exists()) {
+            logger.log(Level.SEVERE, "No such patch file: " + f.getName());
+            System.exit(1);
         }
-        br.close();
-        return result;
-    }
 
-    void readPatchFile(File f) {
-        if (f.exists()) {
-            try {
-                FileInputStream fstream = new FileInputStream(f);
-                DataInputStream in = new DataInputStream(fstream);
-                BufferedReader br = new BufferedReader(new InputStreamReader(in));
-                String strLine;
-                TranslationRecord tr;
-                while ((strLine = br.readLine()) != null) {
-                    try {
-                        tr = TranslationRecordFactory.createTranslationRecord(strLine);
-                        if (tr != null) {
-                            translations.put(tr.source, tr.target);
-                        } else {
-                            logger.info("Patch contains an invalid line, no big deal: " + strLine);
-                        }
-
-                    } catch (NumberFormatException e2) {
-                        // JOptionPane.showMessageDialog(this,
-                        // "That's not how you format translations \""+strLine+System.getProperty("line.separator")+"example:"+System.getProperty("line.separator")+"1 stone -> 3 dirt",
-                        // "Error", JOptionPane.ERROR_MESSAGE);
-                        logger.info("Patch contains an invalid line, no big deal" + strLine);
-                        continue;
+        try {
+            FileInputStream fstream = new FileInputStream(f);
+            DataInputStream in = new DataInputStream(fstream);
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            String strLine;
+            TranslationRecord tr;
+            while ((strLine = br.readLine()) != null) {
+                try {
+                    tr = TranslationRecordFactory.createTranslationRecord(strLine);
+                    if (tr != null) {
+                        translations.put(tr.source, tr.target);
+                    } else {
+                        logger.info("Patch contains an invalid line, no big deal: " + strLine);
                     }
 
+                } catch (NumberFormatException e2) {
+                    // JOptionPane.showMessageDialog(this,
+                    // "That's not how you format translations \""+strLine+System.getProperty("line.separator")+"example:"+System.getProperty("line.separator")+"1 stone -> 3 dirt",
+                    // "Error", JOptionPane.ERROR_MESSAGE);
+                    logger.info("Patch contains an invalid line, no big deal" + strLine);
+                    continue;
                 }
-                br.close();
-                in.close();
-                fstream.close();
 
-            } catch (Exception filewriting) {
-                logger.log(Level.WARNING, "Unable to open patch file", filewriting);
             }
+            br.close();
+            in.close();
+            fstream.close();
+
+        } catch (Exception filewriting) {
+            logger.log(Level.SEVERE, "Unable to open patch file", filewriting);
+            System.exit(1);
         }
+
+        return translations;
     }
 
-    public void convert(File saveGame) {
-        final IDChanger UI = this;
+    private static void convert(File saveGame, HashMap<BlockUID, BlockUID> translations) {
+        if (!isValidSaveGame(saveGame)) {
+            logger.log(Level.SEVERE, "Invalid save game: "+ saveGame.getName());
+            return;
+        }
+
         // change block ids
 
         final World world;
@@ -160,7 +135,7 @@ public class IDChanger {
             world = new World(saveGame);
 
             logger.log(Level.INFO, "Converting...");
-            world.convert(UI, translations);
+            world.convert(translations);
 
         } catch (IOException e1) {
             logger.log(Level.WARNING, "Unable to open world, are you sure you have selected a save?");
@@ -198,10 +173,11 @@ public class IDChanger {
             System.exit(1);
         }
 
-        IDChanger self = new IDChanger();
+        HashMap<BlockUID, BlockUID> translations = readPatchFile((File) options.valueOf("patch-file"));
 
-        self.readPatchFile((File) options.valueOf("patch-file"));
-        self.convert((File) options.valueOf("input-save-game"));
+        logger.log(Level.INFO, "loaded "+translations.size()+" translations");
+
+        convert((File) options.valueOf("input-save-game"), translations);
     }
 
     private static List<String> asList(String... params) {

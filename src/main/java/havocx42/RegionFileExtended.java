@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Level;
+
 import com.mojang.nbt.CompoundTag;
 import com.mojang.nbt.NbtIo;
 import com.mojang.nbt.Tag;
@@ -19,7 +21,7 @@ public class RegionFileExtended extends region.RegionFile {
         super(path);
     }
 
-    public void convert(Status status, HashMap<BlockUID, BlockUID> translations, ArrayList<ConverterPlugin> regionPlugins)
+    public void convert(HashMap<BlockUID, BlockUID> translations, ArrayList<ConverterPlugin> regionPlugins)
             throws IOException {
 
         // Progress
@@ -37,14 +39,14 @@ public class RegionFileExtended extends region.RegionFile {
         }
 
         // PROGESSBAR CHUNK
-        status.pb_chunk.setMaximum(chunks.size() - 1);
+        IDChanger.logger.log(Level.INFO, "Chunks: " + chunks.size());
 
         int count_chunk = 0;
 
         for (Point p : chunks) {
             // Progress
-            status.pb_chunk.setValue(count_chunk++);
-            status.lb_chunk.setText("Current Chunk: (" + p.x + "; " + p.y + ")");
+            //status.pb_chunk.setValue(count_chunk++);
+            IDChanger.logger.log(Level.INFO, "Current Chunk: (" + p.x + "; " + p.y + ")");
 
             // Read chunks
 
@@ -55,7 +57,7 @@ public class RegionFileExtended extends region.RegionFile {
             // find blocks and items in chest etc. inventory
             // convertItems(UI,root, translations);
             for (ConverterPlugin plugin : regionPlugins) {
-                plugin.convert(status, root, translations);
+                plugin.convert(root, translations);
             }
 
             input.close();

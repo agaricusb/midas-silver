@@ -15,6 +15,7 @@ import havocx42.ConverterPlugin;
 import havocx42.PluginType;
 import havocx42.Section;
 import havocx42.Status;
+import pfaeff.IDChanger;
 
 public class ConvertBlocks implements ConverterPlugin {
 
@@ -24,7 +25,7 @@ public class ConvertBlocks implements ConverterPlugin {
 	}
 
 	@Override
-	public void convert(Status status, Tag root, final HashMap<BlockUID, BlockUID> translations) {
+	public void convert(Tag root, final HashMap<BlockUID, BlockUID> translations) {
 		ArrayList<Tag> result = new ArrayList<Tag>();
 		root.findAllChildrenByName(result, "Sections", true);
 		CompoundTag sectionTag;
@@ -38,7 +39,7 @@ public class ConvertBlocks implements ConverterPlugin {
 					for (int i = 0; i < section.length(); i++) {
 						BlockUID blockUID = section.getBlockUID(i);
 						if (translations.containsKey(blockUID)) {
-								status.changedPlaced++;
+								IDChanger.changedPlaced++;
 
 							if (translations.get(blockUID).dataValue == null || translations.get(blockUID).dataValue < 16) {
 

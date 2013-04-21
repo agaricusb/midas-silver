@@ -41,16 +41,12 @@ public class World {
         playerFiles = getPlayerFiles();
     }
 
-    public void convert(IDChanger UI, HashMap<BlockUID, BlockUID> translations) {
-        Status status = UI.status;
-        status.changedChest = 0;
-        status.changedPlaced = 0;
-        status.changedPlayer = 0;
+    public void convert(HashMap<BlockUID, BlockUID> translations) {
         int count_file = 0;
         long beginTime = System.currentTimeMillis();
 
         // player inventories
-        status.pb_file.setMaximum(playerFiles.size() - 1);
+        logger.log(Level.INFO, "Player inventories: "+ playerFiles.size());
 
         // load integrated plugins
         ArrayList<ConverterPlugin> regionPlugins = new ArrayList<ConverterPlugin>();
@@ -62,15 +58,15 @@ public class World {
         playerPlugins.add(new ConvertPlayerInventories());
 
         for (PlayerFile playerFile : playerFiles) {
-            status.pb_file.setValue(count_file++);
-            status.lb_file.setText("Current File: " + playerFile.getName());
+            logger.log(Level.INFO, "Player inventory "+count_file+"/"+playerFiles.size()+": Current File: " + playerFile.getName());
+            ++count_file;
             DataInputStream dis = null;
             try {
                 dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(playerFile))));
 
                 CompoundTag root = NbtIo.read(dis);
                 for (ConverterPlugin plugin : playerPlugins) {
-                    plugin.convert(status, root, translations);
+                    plugin.convert(root, translations);
                 }
                 DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(playerFile)));
                 NbtIo.writeCompressed(root, dos);
@@ -94,26 +90,22 @@ public class World {
             // No valid region files found
             return;
         }
-        status.pb_file.setValue(0);
-        status.pb_file.setMaximum(regionFiles.size() - 1);
+        logger.log(Level.INFO, "Region files: " + regionFiles.size());
 
         for (RegionFileExtended r : regionFiles) {
-            status.lb_file.setText("Current File: " + r.fileName.getName());
-            status.pb_file.setMaximum(regionFiles.size() - 1);
-            status.pb_file.setValue(count_file++);
-            
+            logger.log(Level.INFO, "Region "+count_file+"/"+regionFiles.size()+": Current File: " + r.fileName.getName());
 
             try {
-                r.convert(status, translations, regionPlugins);
+                r.convert(translations, regionPlugins);
             } catch (IOException e) {
                 logger.log(Level.SEVERE, "Unable to convert placed blocks", e);
                 return;
             }
         }
         long duration = System.currentTimeMillis() - beginTime;
-        logger.log(Level.INFO, "Done in " + duration + "ms" + System.getProperty("line.separator") + status.changedPlaced
-                + " placed blocks changed." + System.getProperty("line.separator") + status.changedPlayer
-                + " blocks in player inventories changed." + System.getProperty("line.separator") + status.changedChest
+        logger.log(Level.INFO, "Done in " + duration + "ms" + System.getProperty("line.separator") + IDChanger.changedPlaced
+                + " placed blocks changed." + System.getProperty("line.separator") + IDChanger.changedPlayer
+                + " blocks in player inventories changed." + System.getProperty("line.separator") + IDChanger.changedChest
                 + " blocks in entity inventories changed.");
     }
 

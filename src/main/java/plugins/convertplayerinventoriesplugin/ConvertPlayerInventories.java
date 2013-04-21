@@ -12,6 +12,7 @@ import havocx42.BlockUID;
 import havocx42.ConverterPlugin;
 import havocx42.PluginType;
 import havocx42.Status;
+import pfaeff.IDChanger;
 
 public class ConvertPlayerInventories implements ConverterPlugin {
 
@@ -26,7 +27,7 @@ public class ConvertPlayerInventories implements ConverterPlugin {
 	}
 
 	@Override
-	public void convert(Status status, Tag root, HashMap<BlockUID, BlockUID> translations) {
+	public void convert(Tag root, HashMap<BlockUID, BlockUID> translations) {
 		ArrayList<Tag> inventoriesTag = new ArrayList<Tag>();
 		root.findAllChildrenByName(inventoriesTag, "Inventory", true);
 		for (Tag inventoryTag : inventoriesTag) {
@@ -42,7 +43,7 @@ public class ConvertPlayerInventories implements ConverterPlugin {
 						if (translations.containsKey(blockUID)) {
 							BlockUID toval = translations.get(blockUID);
 							if (toval != null) {
-								status.changedPlayer++;
+								IDChanger.changedPlayer++;
 								idShortTag.data = toval.blockID.shortValue();
 								if (toval.dataValue != null) {
 									damageShortTag.data = toval.dataValue.shortValue();

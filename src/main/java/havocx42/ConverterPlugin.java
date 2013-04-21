@@ -28,10 +28,9 @@ public interface ConverterPlugin {
     /**
      * The method that does the conversion
      * 
-     * @param status The status object, update this to change the UI
      * @param root The root tag of the region or Playerfile
      * @param translations The translations that should be performed.
      */
-    public void convert(Status status, Tag root, HashMap<BlockUID, BlockUID> translations);
+    public void convert(Tag root, HashMap<BlockUID, BlockUID> translations);
 
 }
