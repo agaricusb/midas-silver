@@ -21,10 +21,8 @@
 package pfaeff;
 
 import havocx42.BlockUID;
-import havocx42.ConverterPlugin;
 import havocx42.EventQueueProxy;
 import havocx42.FileListCellRenderer;
-import havocx42.PluginLoader;
 import havocx42.Status;
 import havocx42.TranslationRecord;
 import havocx42.TranslationRecordFactory;
@@ -38,24 +36,19 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.MemoryHandler;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
