@@ -33,10 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -52,19 +49,13 @@ public class IDChanger {
 
     private static void initRootLogger() throws SecurityException, IOException {
 
-        FileHandler fileHandler;
-        fileHandler = new FileHandler("midasLog.%u.%g.txt", 1024 * 1024, 3, true);
-        fileHandler.setLevel(Level.CONFIG);
-        Logger rootLogger = Logger.getLogger("");
-        Handler[] handlers = rootLogger.getHandlers();
-        for (Handler handler : handlers) {
-            handler.setLevel(Level.INFO);
-        }
-        rootLogger.setLevel(Level.CONFIG);
-        rootLogger.addHandler(fileHandler);
+        Handler consoleHandler = new ConsoleHandler();
+        consoleHandler.setLevel(Level.FINER);
+        Logger.getAnonymousLogger().addHandler(consoleHandler);
     }
 
     private static boolean isValidSaveGame(File f) {
+        logger.log(Level.INFO, "Checking save game: " + f.getName());
         ArrayList<RegionFile> rf;
         try {
             rf = NBTFileIO.getRegionFiles(f);

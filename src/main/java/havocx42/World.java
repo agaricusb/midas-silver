@@ -129,16 +129,6 @@ public class World {
             }
         };
 
-        // Create a filter to only include mcr-files
-        FileFilter mcrFiles = new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                if (pathname.getName().toLowerCase().endsWith("mcr")) {
-                    return true;
-                }
-                return false;
-            }
-        };
         // Find all region files
         File[] files = regionDir.listFiles(mcaFiles);
         ArrayList<RegionFileExtended> result = new ArrayList<RegionFileExtended>();
@@ -147,8 +137,10 @@ public class World {
         }
 
         for (int i = 0; i < files.length; i++) {
+            logger.log(Level.INFO, "reading region file "+files[i].getName());
             result.add(new RegionFileExtended(files[i]));
         }
+        logger.log(Level.INFO, "Found "+result.size()+" region files in "+regionDir.getName());
         return result;
     }
 
@@ -179,6 +171,7 @@ public class World {
         if (levelDat.exists()) {
             result.add(new PlayerFile(levelDat.getAbsolutePath(), "level.dat"));
         }
+        logger.log(Level.INFO, "Found "+result.size()+" player files");
 
         return result;
     }

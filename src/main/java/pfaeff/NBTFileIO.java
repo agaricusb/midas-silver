@@ -54,6 +54,7 @@ public class NBTFileIO {
 			@Override
 			public boolean accept(File pathname) {
 				if (pathname.getName().toLowerCase().endsWith("mcr")||pathname.getName().toLowerCase().endsWith("mca")) {
+                    System.out.println("region: " + pathname.getName());
 					return true;
 				}
 				return false;
