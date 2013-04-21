@@ -28,15 +28,7 @@ import havocx42.TranslationRecord;
 import havocx42.TranslationRecordFactory;
 import havocx42.World;
 import havocx42.logging.PopupHandler;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.FlowLayout;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,44 +38,14 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.SwingWorker;
-import javax.swing.UIManager;
-
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import region.RegionFile;
 
 public class IDChanger {
-    /**
-     * 
-     */
-    private static final long    serialVersionUID    = 9149749206914440913L;
-    private ArrayList<File>        saveGames            = new ArrayList<File>();
-    private ArrayList<String>    idNames                = new ArrayList<String>();
-    public Status                status                = new Status();
-
-    // Gui Elements
-    private JComboBox            cb_selectSaveGame;
-    private JComboBox            cb_selectSourceID;
-    private JComboBox            cb_selectTargetID;
-
-    DefaultListModel            model                = new DefaultListModel();
-    public JList                li_ID;
+    // new version use a hashmap to record what blocks to transmute
+    // to what.
+    final HashMap<BlockUID, BlockUID> translations = new HashMap<BlockUID, BlockUID>();
 
     private static Logger        logger                = Logger.getLogger(IDChanger.class.getName());
 
@@ -109,7 +71,7 @@ public class IDChanger {
         try {
             InputStream inputStream = IDChanger.class.getResourceAsStream("/IDNames.txt");
             if (inputStream != null) {
-                idNames = readFile(inputStream);
+                ArrayList<String> idNames = readFile(inputStream);
             } else {
                 logger.info("IDNames.txt does not exist");
             }
@@ -165,7 +127,7 @@ public class IDChanger {
                     try {
                         tr = TranslationRecordFactory.createTranslationRecord(strLine);
                         if (tr != null) {
-                            addTranslation(tr);
+                            translations.put(tr.source, tr.target);
                         } else {
                             logger.info("Patch contains an invalid line, no big deal: " + strLine);
                         }
@@ -190,19 +152,6 @@ public class IDChanger {
     }
 
     public void convert(File saveGame) {
-        // new version use a hashmap to record what blocks to transmute
-        // to what.
-        final HashMap<BlockUID, BlockUID> translations = new HashMap<BlockUID, BlockUID>();
-
-        for (int i = 0; i < model.size(); i++) {
-            TranslationRecord tr = (TranslationRecord) model.get(i);
-            logger.config(tr.toString());
-            if (tr.source != null && tr.target != null) {
-                translations.put(tr.source, tr.target);
-            }
-
-        }
-
         final IDChanger UI = this;
         // change block ids
 
@@ -216,15 +165,6 @@ public class IDChanger {
         } catch (IOException e1) {
             logger.log(Level.WARNING, "Unable to open world, are you sure you have selected a save?");
         }
-    }
-
-    private void addTranslation(TranslationRecord tr) {
-        int index = 0;
-        if (model.getSize() > 0) {
-            index = model.getSize();
-        }
-        model.add(index, tr);
-        return;
     }
 
     public static void main(String[] args) throws IOException {
