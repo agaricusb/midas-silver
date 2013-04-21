@@ -10,8 +10,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Properties;
-
-import com.sun.istack.internal.logging.Logger;
+import java.util.logging.Logger;
 
 public class PluginLoader {
 	private File				pluginDirectory;
@@ -31,7 +30,7 @@ public class PluginLoader {
 		URLClassLoader loader = null;
 		Enumeration<URL> props = null;
 		InputStream stream = null;
-		Logger logger = Logger.getLogger(this.getClass());
+		Logger logger = Logger.getLogger("PluginLoader");
 		classes = new ArrayList<ConverterPlugin>();
 
 		loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
