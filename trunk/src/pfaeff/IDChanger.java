@@ -157,7 +157,9 @@ public class IDChanger extends JFrame implements ActionListener {
 			} else {
 				logger.info("IDNames.txt does not exist");
 			}
-		} catch (IOException | URISyntaxException e1) {
+		} catch (IOException e1) {
+			logger.log(Level.WARNING, "Unable to load IDNames.txt", e1);
+		} catch (URISyntaxException e1) {
 			logger.log(Level.WARNING, "Unable to load IDNames.txt", e1);
 		}
 	}
@@ -598,7 +600,10 @@ public class IDChanger extends JFrame implements ActionListener {
 	public static void main(String[] args) {
 		try {
 			initRootLogger();
-		} catch (SecurityException | IOException e) {
+		} catch (SecurityException e) {
+			logger.log(Level.WARNING, "Unable to create log File", e);
+			return;
+		} catch (IOException e) {
 			logger.log(Level.WARNING, "Unable to create log File", e);
 			return;
 		}

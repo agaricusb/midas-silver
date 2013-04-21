@@ -56,7 +56,13 @@ public class PluginLoader {
 						ConverterPlugin plugin = (ConverterPlugin) myLoader.loadClass(classLocation).newInstance();
 						logger.info("Loaded Plugin: " + plugin.getPluginName());
 						classes.add(plugin);
-					} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ClassNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
