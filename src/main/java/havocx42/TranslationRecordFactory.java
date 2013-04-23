@@ -62,6 +62,10 @@ public class TranslationRecordFactory {
 	}
 	
 	public static TranslationRecord createTranslationRecord(String current) {
+        if (current.contains("#")) {
+            current = current.substring(0, current.indexOf("#"));
+        }
+
 		if (current.contains("->")) {
 			int index = current.indexOf("->");
 			String currentSource = current.substring(0, index );
