@@ -21,13 +21,10 @@
 package pfaeff;
 
 import havocx42.BlockUID;
-import havocx42.EventQueueProxy;
-import havocx42.FileListCellRenderer;
-import havocx42.Status;
 import havocx42.TranslationRecord;
 import havocx42.TranslationRecordFactory;
 import havocx42.World;
-import havocx42.logging.PopupHandler;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
