@@ -21,6 +21,7 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.swing.JOptionPane;
 
+import agaricus.midasplugins.ProjectBenchPlugin;
 import com.mojang.nbt.*;
 
 import havocx42.buildcraftpipesplugin.BuildCraftPipesPlugin;
@@ -53,6 +54,8 @@ public class World {
         regionPlugins.add(new ConvertBlocks());
         regionPlugins.add(new ConvertItems());
         regionPlugins.add(new BuildCraftPipesPlugin());
+
+        regionPlugins.add(new ProjectBenchPlugin());
 
         ArrayList<ConverterPlugin> playerPlugins = new ArrayList<ConverterPlugin>();
         playerPlugins.add(new ConvertPlayerInventories());
