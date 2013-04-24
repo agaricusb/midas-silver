@@ -47,24 +47,11 @@ public class IDChanger {
     public static int changedChest = 0;
     public static int changedPlayer = 0;
 
-    // single-line log formatter
-    private static final class LogFormatter extends SimpleFormatter {
-        private static final String LINE_SEPARATOR = System.getProperty("line.separator");
-
-        @Override
-        public String format(LogRecord record) {
-            return "hi";
-            //return record.getLevel().getLocalizedName() + ": " + formatMessage(record) + LINE_SEPARATOR;
-        }
-    }
-
     private static void initRootLogger() throws SecurityException, IOException {
 
         Handler consoleHandler = new ConsoleHandler();
         consoleHandler.setLevel(Level.FINER);
-        consoleHandler.setFormatter(new LogFormatter());
         Logger.getAnonymousLogger().addHandler(consoleHandler);
-        logger.addHandler(consoleHandler);
     }
 
     private static boolean isValidSaveGame(File f) {
