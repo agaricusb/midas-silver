@@ -47,13 +47,6 @@ public class IDChanger {
     public static int changedChest = 0;
     public static int changedPlayer = 0;
 
-    private static void initRootLogger() throws SecurityException, IOException {
-
-        Handler consoleHandler = new ConsoleHandler();
-        consoleHandler.setLevel(Level.FINER);
-        Logger.getAnonymousLogger().addHandler(consoleHandler);
-    }
-
     private static boolean isValidSaveGame(File f) {
         logger.log(Level.INFO, "Checking save game: " + f.getName());
         ArrayList<RegionFile> rf;
@@ -115,8 +108,6 @@ public class IDChanger {
 
 
     public static void main(String[] args) throws IOException {
-        initRootLogger();
-
         OptionSet options = null;
 
         OptionParser parser = new OptionParser() {
