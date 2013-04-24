@@ -25,6 +25,7 @@ import agaricus.midasplugins.ProjectBenchPlugin;
 import com.mojang.nbt.*;
 
 import havocx42.buildcraftpipesplugin.BuildCraftPipesPlugin;
+import joptsimple.OptionSet;
 import pfaeff.IDChanger;
 import plugins.convertblocksplugin.ConvertBlocks;
 import plugins.convertitemsplugin.ConvertItems;
@@ -42,7 +43,7 @@ public class World {
         playerFiles = getPlayerFiles();
     }
 
-    public void convert(HashMap<BlockUID, BlockUID> translations) {
+    public void convert(HashMap<BlockUID, BlockUID> translations, OptionSet options) {
         int count_file = 0;
         long beginTime = System.currentTimeMillis();
 
@@ -51,14 +52,25 @@ public class World {
 
         // load integrated plugins
         ArrayList<ConverterPlugin> regionPlugins = new ArrayList<ConverterPlugin>();
-        regionPlugins.add(new ConvertBlocks());
-        regionPlugins.add(new ConvertItems());
-        regionPlugins.add(new BuildCraftPipesPlugin());
+        if (!options.has("no-convert-blocks")) regionPlugins.add(new ConvertBlocks());
+        if (!options.has("no-convert-items")) regionPlugins.add(new ConvertItems());
+        if (!options.has("no-convert-buildcraft-pipes")) regionPlugins.add(new BuildCraftPipesPlugin());
 
-        regionPlugins.add(new ProjectBenchPlugin());
+        if (options.has("convert-project-table")) regionPlugins.add(new ProjectBenchPlugin());
 
         ArrayList<ConverterPlugin> playerPlugins = new ArrayList<ConverterPlugin>();
-        playerPlugins.add(new ConvertPlayerInventories());
+        if (!options.has("no-convert-player-inventories")) playerPlugins.add(new ConvertPlayerInventories());
+
+
+        logger.log(Level.INFO, "Enabled "+regionPlugins.size()+" region plugins:");
+        for (ConverterPlugin plugin : regionPlugins) {
+            logger.log(Level.INFO, "- " + plugin.getPluginName());
+        }
+
+        logger.log(Level.INFO, "Enabled "+playerPlugins.size()+" player plugins:");
+        for (ConverterPlugin plugin : playerPlugins) {
+            logger.log(Level.INFO, "- " + plugin.getPluginName());
+        }
 
         for (PlayerFile playerFile : playerFiles) {
             logger.log(Level.INFO, "Player inventory "+count_file+"/"+playerFiles.size()+": Current File: " + playerFile.getName());

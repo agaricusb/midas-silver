@@ -113,25 +113,6 @@ public class IDChanger {
         return translations;
     }
 
-    private static void convert(File saveGame, HashMap<BlockUID, BlockUID> translations) {
-        if (!isValidSaveGame(saveGame)) {
-            logger.log(Level.SEVERE, "Invalid save game: "+ saveGame.getName());
-            return;
-        }
-
-        // change block ids
-
-        final World world;
-        try {
-            world = new World(saveGame);
-
-            logger.log(Level.INFO, "Converting...");
-            world.convert(translations);
-
-        } catch (IOException e1) {
-            logger.log(Level.WARNING, "Unable to open world, are you sure you have selected a save?");
-        }
-    }
 
     public static void main(String[] args) throws IOException {
         initRootLogger();
@@ -149,6 +130,13 @@ public class IDChanger {
                 acceptsAll(asList("i", "input-save-game"), "Save game to read as input")
                         .withRequiredArg()
                         .ofType(File.class);
+
+                acceptsAll(asList("no-convert-blocks"), "Disable block ID conversion");
+                acceptsAll(asList("no-convert-items"), "Disable item ID conversion");
+                acceptsAll(asList("no-convert-buildcraft-pipes"),"Disable BuildCraft pipe ID conversion");
+                acceptsAll(asList("no-convert-player-inventories"), "Disable player inventory ID conversion");
+
+                acceptsAll(asList("convert-project-table"), "Enable conversion of RedPower2 Project Table to bau5 Project Bench");
             }
         };
 
@@ -168,7 +156,26 @@ public class IDChanger {
 
         logger.log(Level.INFO, "loaded "+translations.size()+" translations");
 
-        convert((File) options.valueOf("input-save-game"), translations);
+
+        File saveGame = (File) options.valueOf("input-save-game");
+
+        if (!isValidSaveGame(saveGame)) {
+            logger.log(Level.SEVERE, "Invalid save game: "+ saveGame.getName());
+            return;
+        }
+
+        // change block ids
+
+        final World world;
+        try {
+            world = new World(saveGame);
+
+            logger.log(Level.INFO, "Converting...");
+            world.convert(translations, options);
+
+        } catch (IOException e1) {
+            logger.log(Level.WARNING, "Unable to open world, are you sure you have selected a save?");
+        }
     }
 
     private static List<String> asList(String... params) {
