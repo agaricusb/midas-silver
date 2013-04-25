@@ -125,7 +125,8 @@ public class IDChanger {
                 acceptsAll(asList("no-convert-player-inventories"), "Disable player inventory ID conversion");
 
                 acceptsAll(asList("convert-project-table"), "Enable conversion of RedPower2 Project Table to bau5 Project Bench");
-                acceptsAll(asList("dump-tile-entities"), "Dump tile entity NBT data for debugging purposes");
+                acceptsAll(asList("dump-tile-entities"), "Enable dumping tile entity NBT data for debugging purposes");
+                acceptsAll(asList("convert-charging-bench-gregtech"), "Enable conversion of IC2 Charging Bench to GregTech Charge-O-Mat");
             }
         };
 

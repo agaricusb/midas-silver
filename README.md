@@ -85,6 +85,10 @@ _New in Midas Silver_:
 
 ProjectBenchPlugin: converts [RedPower2](http://www.minecraftforum.net/topic/365357-146-eloraams-mods-redpower-2-prerelease-6/) Project Table tile entities to bau5 [Project Bench](http://www.minecraftforum.net/topic/1550010-151sspsmp-project-bench-v173forge5000-downloads/) tile entities. You can convert the block ID as well in the patch file.
 
+DumpTileEntitiesPlugin: dumps tile entity NBT for debugging
+
+ChargingBenchGregTechPlugin: converts IndustrialCraft2 [Charging Bench](http://www.mcportcentral.co.za/index.php?topic=2444.0) to [GregTech](http://forum.industrial-craft.net/index.php?page=Thread&threadID=7156) Charge-O-Mat tile entities
+
 
 Sourcecode
 ----------

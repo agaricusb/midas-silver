@@ -21,6 +21,7 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.swing.JOptionPane;
 
+import agaricus.midasplugins.ChargingBenchGregTechPlugin;
 import agaricus.midasplugins.DumpTileEntitiesPlugin;
 import agaricus.midasplugins.ProjectBenchPlugin;
 import com.mojang.nbt.*;
@@ -59,6 +60,7 @@ public class World {
 
         if (options.has("convert-project-table")) regionPlugins.add(new ProjectBenchPlugin());
         if (options.has("dump-tile-entities")) regionPlugins.add(new DumpTileEntitiesPlugin());
+        if (options.has("convert-charging-bench-gregtech")) regionPlugins.add(new ChargingBenchGregTechPlugin());
 
         ArrayList<ConverterPlugin> playerPlugins = new ArrayList<ConverterPlugin>();
         if (!options.has("no-convert-player-inventories")) playerPlugins.add(new ConvertPlayerInventories());
