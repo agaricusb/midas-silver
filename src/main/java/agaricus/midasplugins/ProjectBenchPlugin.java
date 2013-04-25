@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class ProjectBenchPlugin implements ConverterPlugin {
+
     @Override
     public String getPluginName() {
         return "RedPower2 Project Table -> bau5 Project Bench tile entity converter plugin";
