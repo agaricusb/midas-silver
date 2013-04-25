@@ -8,6 +8,12 @@ IMPORTANT NOTE:
 
 I am not responsible for any damage or data loss that may occur using this tool.
 
+Downloads
+---------
+
+Latest builds are available from Buildhive: 
+[![Build Status](https://buildhive.cloudbees.com/job/agaricusb/job/midas-silver/badge/icon)](https://buildhive.cloudbees.com/job/agaricusb/job/midas-silver/)
+
 What is mIDas?
 --------------
 
