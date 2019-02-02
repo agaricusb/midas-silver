@@ -54,7 +54,7 @@ public class World {
 
         // load integrated plugins
         ArrayList<ConverterPlugin> regionPlugins = new ArrayList<ConverterPlugin>();
-        if (!options.has("no-convert-blocks")) regionPlugins.add(new ConvertBlocks());
+        if (!options.has("no-convert-blocks")) regionPlugins.add(new ConvertBlocks(((Integer)options.valueOf("warn-unconverted-block-id-after"))));
         if (!options.has("no-convert-items")) regionPlugins.add(new ConvertItems());
         if (!options.has("no-convert-buildcraft-pipes")) regionPlugins.add(new BuildCraftPipesPlugin());
 

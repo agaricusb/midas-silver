@@ -19,6 +19,16 @@ import pfaeff.IDChanger;
 
 public class ConvertBlocks implements ConverterPlugin {
 
+	private int warnUnconvertedAfter;
+
+	public ConvertBlocks(Integer warnUnconvertedAfter) {
+		if (warnUnconvertedAfter == null) {
+			this.warnUnconvertedAfter = -1;
+		} else {
+			this.warnUnconvertedAfter = warnUnconvertedAfter; 	
+		}
+	}
+
 	@Override
 	public String getPluginName() {
 		return "Convert Blocks";
@@ -44,6 +54,10 @@ public class ConvertBlocks implements ConverterPlugin {
 							if (translations.get(blockUID).dataValue == null || translations.get(blockUID).dataValue < 16) {
 
 								indexToBlockIDs.put(Integer.valueOf(i), translations.get(blockUID));
+							}
+						} else {
+							if (warnUnconvertedAfter != -1 && blockUID.blockID > warnUnconvertedAfter) {
+								System.out.println("untranslated block:" + blockUID);
 							}
 						}
 					}

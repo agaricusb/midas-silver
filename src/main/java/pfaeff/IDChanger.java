@@ -127,6 +127,9 @@ public class IDChanger {
                 acceptsAll(asList("convert-project-table"), "Enable conversion of RedPower2 Project Table to bau5 Project Bench");
                 acceptsAll(asList("dump-tile-entities"), "Enable dumping tile entity NBT data for debugging purposes");
                 acceptsAll(asList("convert-charging-bench-gregtech"), "Enable conversion of IC2 Charging Bench to GregTech Charge-O-Mat");
+                acceptsAll(asList("warn-unconverted-block-id-after"), "Log block IDs without mappings, after vanilla maximum")
+                        .withRequiredArg()
+                        .ofType(Integer.class);
             }
         };
 
