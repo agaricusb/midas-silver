@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.*;
+import java.util.Map;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -43,6 +44,8 @@ public class IDChanger {
     public static int changedPlaced = 0;
     public static int changedChest = 0;
     public static int changedPlayer = 0;
+
+    public static Map<BlockUID, Integer> convertedBlockCount = new HashMap<BlockUID, Integer>();
 
     private static boolean isValidSaveGame(File f) {
         logger.log(Level.INFO, "Checking save game: " + f.getName());
@@ -126,6 +129,7 @@ public class IDChanger {
 
                 acceptsAll(asList("convert-project-table"), "Enable conversion of RedPower2 Project Table to bau5 Project Bench");
                 acceptsAll(asList("dump-tile-entities"), "Enable dumping tile entity NBT data for debugging purposes");
+                acceptsAll(asList("count-block-stats"), "Enable counting the types of blocks converted");
                 acceptsAll(asList("convert-charging-bench-gregtech"), "Enable conversion of IC2 Charging Bench to GregTech Charge-O-Mat");
                 acceptsAll(asList("warn-unconverted-block-id-after"), "Log block IDs without mappings, after vanilla maximum")
                         .withRequiredArg()

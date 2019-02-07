@@ -20,13 +20,15 @@ import pfaeff.IDChanger;
 public class ConvertBlocks implements ConverterPlugin {
 
 	private int warnUnconvertedAfter;
+	private boolean countBlockStats;
 
-	public ConvertBlocks(Integer warnUnconvertedAfter) {
+	public ConvertBlocks(Integer warnUnconvertedAfter, boolean countBlockStats) {
 		if (warnUnconvertedAfter == null) {
 			this.warnUnconvertedAfter = -1;
 		} else {
 			this.warnUnconvertedAfter = warnUnconvertedAfter; 	
 		}
+		this.countBlockStats = countBlockStats;
 	}
 
 	@Override
@@ -54,6 +56,13 @@ public class ConvertBlocks implements ConverterPlugin {
 							if (translations.get(blockUID).dataValue == null || translations.get(blockUID).dataValue < 16) {
 
 								indexToBlockIDs.put(Integer.valueOf(i), translations.get(blockUID));
+							}
+
+							Integer count = IDChanger.convertedBlockCount.get(blockUID);
+							if (count == null) {
+								IDChanger.convertedBlockCount.put(blockUID, 1);
+							} else {
+								IDChanger.convertedBlockCount.put(blockUID, count + 1);
 							}
 						} else {
 							if (warnUnconvertedAfter != -1 && blockUID.blockID > warnUnconvertedAfter) {

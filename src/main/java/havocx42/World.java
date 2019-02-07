@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
@@ -38,6 +39,7 @@ public class World {
     private ArrayList<RegionFileExtended>    regionFiles;
     private ArrayList<PlayerFile>            playerFiles;
     private Logger                            logger    = Logger.getLogger(this.getClass().getName());
+    private boolean countBlockStats;
 
     public World(File path) throws IOException {
         baseFolder = path;
@@ -48,13 +50,16 @@ public class World {
     public void convert(HashMap<BlockUID, BlockUID> translations, OptionSet options) {
         int count_file = 0;
         long beginTime = System.currentTimeMillis();
+        this.countBlockStats = options.has("count-block-stats");
 
         // player inventories
         logger.log(Level.INFO, "Player inventories: "+ playerFiles.size());
 
         // load integrated plugins
         ArrayList<ConverterPlugin> regionPlugins = new ArrayList<ConverterPlugin>();
-        if (!options.has("no-convert-blocks")) regionPlugins.add(new ConvertBlocks(((Integer)options.valueOf("warn-unconverted-block-id-after"))));
+        if (!options.has("no-convert-blocks")) regionPlugins.add(new ConvertBlocks(
+                ((Integer)options.valueOf("warn-unconverted-block-id-after")),
+                options.has("count-block-stats")));
         if (!options.has("no-convert-items")) regionPlugins.add(new ConvertItems());
         if (!options.has("no-convert-buildcraft-pipes")) regionPlugins.add(new BuildCraftPipesPlugin());
 
@@ -126,6 +131,12 @@ public class World {
                 + " placed blocks changed." + System.getProperty("line.separator") + IDChanger.changedPlayer
                 + " blocks in player inventories changed." + System.getProperty("line.separator") + IDChanger.changedChest
                 + " blocks in entity inventories changed.");
+
+        if (this.countBlockStats) {
+            for (Map.Entry<BlockUID, Integer> entry : IDChanger.convertedBlockCount.entrySet()) {
+                System.out.println("Count " + entry.getValue() + " " + entry.getKey());
+            }
+        }
     }
 
     private ArrayList<RegionFileExtended> getRegionFiles() throws IOException {
