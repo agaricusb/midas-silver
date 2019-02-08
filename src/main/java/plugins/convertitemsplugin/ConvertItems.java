@@ -21,6 +21,18 @@ import pfaeff.IDChanger;
 
 public class ConvertItems implements ConverterPlugin {
 
+	private int warnUnconvertedAfter;
+	private boolean countItemStats;
+
+	public ConvertItems(Integer warnUnconvertedAfter, boolean countItemStats) {
+		if (warnUnconvertedAfter == null) {
+			this.warnUnconvertedAfter = -1;
+		} else {
+			this.warnUnconvertedAfter = warnUnconvertedAfter;
+		}
+		this.countItemStats = countItemStats;
+	}
+
 	@Override
 	public String getPluginName() {
 		// TODO Auto-generated method stub
@@ -50,6 +62,19 @@ public class ConvertItems implements ConverterPlugin {
 								idShortTag.data = targetBlock.blockID.shortValue();
 								if (targetBlock.dataValue != null)
 									damageShortTag.data = targetBlock.dataValue.shortValue();
+
+								if (countItemStats) {
+									Integer count = IDChanger.convertedItemCount.get(currentBlock);
+									if (count == null) {
+										IDChanger.convertedItemCount.put(currentBlock, 1);
+									} else {
+										IDChanger.convertedItemCount.put(currentBlock, count + 1);
+									}
+								}
+							} else {
+								if (warnUnconvertedAfter != -1 && currentBlock.blockID > warnUnconvertedAfter) {
+									System.out.println("untranslated item:" + currentBlock);
+								}
 							}
 						} 
 					}

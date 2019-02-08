@@ -40,6 +40,7 @@ public class World {
     private ArrayList<PlayerFile>            playerFiles;
     private Logger                            logger    = Logger.getLogger(this.getClass().getName());
     private boolean countBlockStats;
+    private boolean countItemStats;
 
     public World(File path) throws IOException {
         baseFolder = path;
@@ -51,6 +52,7 @@ public class World {
         int count_file = 0;
         long beginTime = System.currentTimeMillis();
         this.countBlockStats = options.has("count-block-stats");
+        this.countItemStats = options.has("count-item-stats");
 
         // player inventories
         logger.log(Level.INFO, "Player inventories: "+ playerFiles.size());
@@ -59,8 +61,10 @@ public class World {
         ArrayList<ConverterPlugin> regionPlugins = new ArrayList<ConverterPlugin>();
         if (!options.has("no-convert-blocks")) regionPlugins.add(new ConvertBlocks(
                 ((Integer)options.valueOf("warn-unconverted-block-id-after")),
-                options.has("count-block-stats")));
-        if (!options.has("no-convert-items")) regionPlugins.add(new ConvertItems());
+                this.countBlockStats));
+        if (!options.has("no-convert-items")) regionPlugins.add(new ConvertItems(
+                ((Integer)options.valueOf("warn-unconverted-item-id-after")),
+                this.countItemStats));
         if (!options.has("no-convert-buildcraft-pipes")) regionPlugins.add(new BuildCraftPipesPlugin());
 
         if (options.has("convert-project-table")) regionPlugins.add(new ProjectBenchPlugin());
@@ -134,7 +138,13 @@ public class World {
 
         if (this.countBlockStats) {
             for (Map.Entry<BlockUID, Integer> entry : IDChanger.convertedBlockCount.entrySet()) {
-                System.out.println("Count " + entry.getValue() + " " + entry.getKey());
+                System.out.println("Count block " + entry.getValue() + " " + entry.getKey());
+            }
+        }
+
+        if (this.countItemStats) {
+            for (Map.Entry<BlockUID, Integer> entry : IDChanger.convertedItemCount.entrySet()) {
+                System.out.println("Count item " + entry.getValue() + " " + entry.getKey());
             }
         }
     }

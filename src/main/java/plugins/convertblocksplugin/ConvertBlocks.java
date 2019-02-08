@@ -58,11 +58,13 @@ public class ConvertBlocks implements ConverterPlugin {
 								indexToBlockIDs.put(Integer.valueOf(i), translations.get(blockUID));
 							}
 
-							Integer count = IDChanger.convertedBlockCount.get(blockUID);
-							if (count == null) {
-								IDChanger.convertedBlockCount.put(blockUID, 1);
-							} else {
-								IDChanger.convertedBlockCount.put(blockUID, count + 1);
+							if (countBlockStats) {
+								Integer count = IDChanger.convertedBlockCount.get(blockUID);
+								if (count == null) {
+									IDChanger.convertedBlockCount.put(blockUID, 1);
+								} else {
+									IDChanger.convertedBlockCount.put(blockUID, count + 1);
+								}
 							}
 						} else {
 							if (warnUnconvertedAfter != -1 && blockUID.blockID > warnUnconvertedAfter) {
